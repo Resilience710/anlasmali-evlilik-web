@@ -1,0 +1,256 @@
+// Anlaşmalı Evlilik - Prisma şeması
+// NOT: Şema kasıtlı olarak DB-bağımsız tutuldu (enum/native tip yok) ->
+// yerel geliştirmede SQLite, üretimde Supabase Postgres ile aynı şema çalışır.
+// Üretim için: provider = "postgresql" yapın ve DATABASE_URL'i Supabase'e çevirin.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Kullanıcı / Auth ----------
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  role          String    @default("USER") // USER | ADMIN
+  isBanned      Boolean   @default(false)
+  lastSeenAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  profile       Profile?
+  listings      Listing[]
+  accounts      Account[]
+  sessions      Session[]
+
+  sentMessages   Message[]      @relation("MessageSender")
+  conversationsA Conversation[] @relation("ConvA")
+  conversationsB Conversation[] @relation("ConvB")
+
+  favorites      Favorite[]
+  notifications  Notification[]
+  reportsMade    Report[]       @relation("Reporter")
+  reportsAgainst Report[]       @relation("ReportedUser")
+
+  @@index([role])
+  @@index([lastSeenAt])
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String
+  avatarUrl   String?
+  bio         String?
+  gender      String?  // MALE | FEMALE
+  age         Int?
+  cityId      String?
+  city        City?    @relation(fields: [cityId], references: [id])
+  lookingFor  String?  // MALE | FEMALE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([cityId])
+  @@index([gender])
+}
+
+// ---------- Katalog (admin yönetir) ----------
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  order    Int       @default(0)
+  isActive Boolean   @default(true)
+  listings Listing[]
+}
+
+model City {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  order    Int       @default(0)
+  isActive Boolean   @default(true)
+  listings Listing[]
+  profiles Profile[]
+}
+
+model AgeOption {
+  id       String  @id @default(cuid())
+  label    String
+  minAge   Int
+  maxAge   Int
+  order    Int     @default(0)
+  isActive Boolean @default(true)
+}
+
+// ---------- İlanlar ----------
+model Listing {
+  id           String    @id @default(cuid())
+  authorId     String
+  author       User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title        String
+  slug         String    @unique
+  description  String
+  age          Int
+  gender       String    // ilan sahibi: MALE | FEMALE
+  targetGender String    // aranan kişi: MALE | FEMALE
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  cityId       String
+  city         City      @relation(fields: [cityId], references: [id])
+  imageUrl     String?
+  status       String    @default("PENDING") // PENDING | APPROVED | REJECTED | ARCHIVED
+  rejectReason String?
+  viewCount    Int       @default(0)
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  favorites Favorite[]
+  reports   Report[]   @relation("ReportedListing")
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@index([cityId])
+  @@index([authorId])
+}
+
+// ---------- Mesajlaşma ----------
+model Conversation {
+  id            String    @id @default(cuid())
+  userAId       String // canonical: min(id)
+  userBId       String // canonical: max(id)
+  userA         User      @relation("ConvA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB         User      @relation("ConvB", fields: [userBId], references: [id], onDelete: Cascade)
+  lastReadA     DateTime?
+  lastReadB     DateTime?
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  messages      Message[]
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  createdAt      DateTime     @default(now())
+  deletedAt      DateTime?
+
+  @@index([conversationId, createdAt])
+}
+
+// ---------- Favori / Bildirim / Şikayet ----------
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // MESSAGE | FAVORITE | LISTING_APPROVED | LISTING_REJECTED | REPORT | SYSTEM
+  title     String
+  body      String?
+  linkUrl   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+model Report {
+  id             String   @id @default(cuid())
+  reporterId     String
+  reporter       User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType     String // LISTING | USER | MESSAGE
+  reason         String
+  detail         String?
+  status         String   @default("OPEN") // OPEN | REVIEWING | RESOLVED | DISMISSED
+  listingId      String?
+  listing        Listing? @relation("ReportedListing", fields: [listingId], references: [id], onDelete: SetNull)
+  reportedUserId String?
+  reportedUser   User?    @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  resolvedById   String?
+  createdAt      DateTime @default(now())
+
+  @@index([status])
+}
+
+// ---------- Site ayarları (tek satır) ----------
+model SiteSetting {
+  id           String   @id @default("singleton")
+  siteName     String   @default("anlaşmalievlilik.com")
+  tagline      String   @default("Ciddi İlişki, Mutlu Evlilik")
+  logoUrl      String?
+  heroTitle    String   @default("Hayat Arkadaşınızı Burada Bulun")
+  heroSubtitle String   @default("Ciddi düşünen, geleceğe birlikte yürümek isteyen insanları bir araya getiriyoruz.")
+  aboutText    String?
+  contactEmail String?
+  contactPhone String?
+  termsText    String?
+  privacyText  String?
+  faqJson      String? // JSON string: [{q,a}]
+  socialJson   String? // JSON string: {instagram, facebook, x, youtube}
+  happyCount   Int      @default(0) // Mutlu Evlilik sayacı (admin elle ayarlar)
+  updatedAt    DateTime @updatedAt
+}
+
+// ---------- NextAuth adapter tabloları ----------
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
