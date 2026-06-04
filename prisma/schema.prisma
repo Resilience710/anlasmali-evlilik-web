@@ -48,7 +48,8 @@ model Profile {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  displayName String
+  displayName String // Ad Soyad
+  username    String? // Takma ad
   avatarUrl   String?
   bio         String?
   gender      String?  // MALE | FEMALE

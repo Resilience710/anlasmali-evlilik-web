@@ -25,6 +25,7 @@ export default async function ProfilePage() {
           cities={cities}
           defaults={{
             displayName: profile?.displayName ?? "",
+            username: profile?.username,
             bio: profile?.bio,
             gender: profile?.gender,
             age: profile?.age,

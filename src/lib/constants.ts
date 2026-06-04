@@ -54,6 +54,15 @@ export const NOTIFICATION_TYPES = [
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
+/**
+ * İlanlar yayınlanmadan önce yönetici onayı gereksin mi?
+ * false  -> ilan oluşturulunca/güncellenince ANINDA yayınlanır (onay kapalı).
+ * true   -> ilan önce "Onay Bekliyor" olur, admin onaylayınca yayınlanır.
+ * Onaylama altyapısı (admin paneli onay kuyruğu, approve/reject) korunur;
+ * yalnızca bu bayrağı true yapmak özelliği geri açar.
+ */
+export const LISTING_REQUIRES_APPROVAL = false;
+
 /** Kullanıcının "online" sayılması için son aktiflik eşiği (ms). */
 export const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
 

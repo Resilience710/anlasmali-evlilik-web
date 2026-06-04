@@ -10,6 +10,8 @@ export type ActionState = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
   success?: string;
+  // Hata olunca girilen değerleri geri yollar (parola hariç) -> form temizlenmez.
+  values?: Record<string, string>;
 };
 
 export async function registerAction(
@@ -18,6 +20,7 @@ export async function registerAction(
 ): Promise<ActionState> {
   const raw = {
     displayName: formData.get("displayName"),
+    username: formData.get("username"),
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
@@ -25,9 +28,21 @@ export async function registerAction(
     acceptTerms: formData.get("acceptTerms") === "on",
   };
 
+  // Parola dışı alanları koru (hata sonrası form temizlenmesin)
+  const keepValues = {
+    displayName: String(formData.get("displayName") ?? ""),
+    username: String(formData.get("username") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    gender: String(formData.get("gender") ?? ""),
+    acceptTerms: formData.get("acceptTerms") === "on" ? "on" : "",
+  };
+
   const parsed = registerSchema.safeParse(raw);
   if (!parsed.success) {
-    return { fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+      values: keepValues,
+    };
   }
 
   const email = parsed.data.email.toLowerCase().trim();
@@ -46,6 +61,7 @@ export async function registerAction(
       profile: {
         create: {
           displayName: parsed.data.displayName,
+          username: parsed.data.username,
           gender: parsed.data.gender,
         },
       },

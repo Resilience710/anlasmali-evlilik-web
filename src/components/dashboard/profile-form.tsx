@@ -23,6 +23,7 @@ type Defaults = {
   cityId?: string | null;
   lookingFor?: string | null;
   avatarUrl?: string | null;
+  username?: string | null;
 };
 
 export function ProfileForm({
@@ -56,18 +57,32 @@ export function ProfileForm({
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="displayName">Ad Soyad / Takma Ad</Label>
-        <Input
-          id="displayName"
-          name="displayName"
-          defaultValue={defaults.displayName}
-          className="mt-1.5"
-          required
-        />
-        {fe.displayName?.[0] && (
-          <p className="mt-1 text-xs text-destructive">{fe.displayName[0]}</p>
-        )}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="displayName">Ad Soyad</Label>
+          <Input
+            id="displayName"
+            name="displayName"
+            defaultValue={defaults.displayName}
+            className="mt-1.5"
+            required
+          />
+          {fe.displayName?.[0] && (
+            <p className="mt-1 text-xs text-destructive">{fe.displayName[0]}</p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="username">Takma Ad</Label>
+          <Input
+            id="username"
+            name="username"
+            defaultValue={defaults.username ?? ""}
+            className="mt-1.5"
+          />
+          {fe.username?.[0] && (
+            <p className="mt-1 text-xs text-destructive">{fe.username[0]}</p>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

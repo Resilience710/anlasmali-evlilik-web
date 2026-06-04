@@ -6,10 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { listingSchema } from "@/lib/validations";
 import { slugify, randomSuffix } from "@/lib/utils";
+import { LISTING_REQUIRES_APPROVAL } from "@/lib/constants";
 
 export type ListingActionState = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
+  // Hata olduğunda girilen değerleri geri yollayıp formun temizlenmemesini sağlar.
+  values?: Record<string, string>;
 };
 
 function parseForm(formData: FormData) {
@@ -25,6 +28,22 @@ function parseForm(formData: FormData) {
   };
 }
 
+function formValues(formData: FormData): Record<string, string> {
+  const keys = [
+    "title",
+    "description",
+    "categoryId",
+    "cityId",
+    "age",
+    "gender",
+    "targetGender",
+    "imageUrl",
+  ];
+  const out: Record<string, string> = {};
+  for (const k of keys) out[k] = String(formData.get(k) ?? "");
+  return out;
+}
+
 export async function createListingAction(
   _prev: ListingActionState,
   formData: FormData
@@ -34,7 +53,10 @@ export async function createListingAction(
 
   const parsed = listingSchema.safeParse(parseForm(formData));
   if (!parsed.success) {
-    return { fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+      values: formValues(formData),
+    };
   }
 
   const d = parsed.data;
@@ -52,28 +74,33 @@ export async function createListingAction(
       categoryId: d.categoryId,
       cityId: d.cityId,
       imageUrl: d.imageUrl || null,
-      status: "PENDING",
+      status: LISTING_REQUIRES_APPROVAL ? "PENDING" : "APPROVED",
+      publishedAt: LISTING_REQUIRES_APPROVAL ? null : new Date(),
     },
   });
 
-  // Yöneticilere bildirim
-  const admins = await prisma.user.findMany({
-    where: { role: "ADMIN", deletedAt: null },
-    select: { id: true },
-  });
-  if (admins.length) {
-    await prisma.notification.createMany({
-      data: admins.map((a) => ({
-        userId: a.id,
-        type: "SYSTEM",
-        title: "Onay bekleyen ilan",
-        body: `"${d.title}" başlıklı yeni ilan onayınızı bekliyor.`,
-        linkUrl: "/admin/ilanlar?status=PENDING",
-      })),
+  // Onay açıksa yöneticilere bildirim gönder
+  if (LISTING_REQUIRES_APPROVAL) {
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN", deletedAt: null },
+      select: { id: true },
     });
+    if (admins.length) {
+      await prisma.notification.createMany({
+        data: admins.map((a) => ({
+          userId: a.id,
+          type: "SYSTEM",
+          title: "Onay bekleyen ilan",
+          body: `"${d.title}" başlıklı yeni ilan onayınızı bekliyor.`,
+          linkUrl: "/admin/ilanlar?status=PENDING",
+        })),
+      });
+    }
   }
 
   revalidatePath("/hesabim/ilanlarim");
+  revalidatePath("/");
+  revalidatePath("/ilanlar");
   redirect("/hesabim/ilanlarim?created=1");
 }
 
@@ -87,7 +114,7 @@ export async function updateListingAction(
 
   const existing = await prisma.listing.findUnique({
     where: { id: listingId },
-    select: { authorId: true },
+    select: { authorId: true, publishedAt: true },
   });
   if (!existing || existing.authorId !== session.user.id) {
     return { error: "Bu ilanı düzenleme yetkiniz yok." };
@@ -95,11 +122,14 @@ export async function updateListingAction(
 
   const parsed = listingSchema.safeParse(parseForm(formData));
   if (!parsed.success) {
-    return { fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      fieldErrors: parsed.error.flatten().fieldErrors,
+      values: formValues(formData),
+    };
   }
   const d = parsed.data;
 
-  // Düzenlenen ilan yeniden onaya düşer
+  // Onay açıksa düzenlenen ilan yeniden onaya düşer; kapalıysa yayında kalır.
   await prisma.listing.update({
     where: { id: listingId },
     data: {
@@ -111,12 +141,17 @@ export async function updateListingAction(
       categoryId: d.categoryId,
       cityId: d.cityId,
       imageUrl: d.imageUrl || null,
-      status: "PENDING",
+      status: LISTING_REQUIRES_APPROVAL ? "PENDING" : "APPROVED",
+      publishedAt: LISTING_REQUIRES_APPROVAL
+        ? null
+        : existing.publishedAt ?? new Date(),
       rejectReason: null,
     },
   });
 
   revalidatePath("/hesabim/ilanlarim");
+  revalidatePath("/");
+  revalidatePath("/ilanlar");
   redirect("/hesabim/ilanlarim?updated=1");
 }
 

@@ -10,8 +10,12 @@ export const registerSchema = z
   .object({
     displayName: z
       .string()
-      .min(2, "İsim en az 2 karakter olmalı")
-      .max(50, "İsim en fazla 50 karakter"),
+      .min(2, "Ad soyad en az 2 karakter olmalı")
+      .max(60, "Ad soyad en fazla 60 karakter"),
+    username: z
+      .string()
+      .min(2, "Takma ad en az 2 karakter olmalı")
+      .max(30, "Takma ad en fazla 30 karakter"),
     email: z.string().email("Geçerli bir e-posta girin"),
     password: z
       .string()
@@ -29,7 +33,13 @@ export const registerSchema = z
   });
 
 export const profileSchema = z.object({
-  displayName: z.string().min(2, "İsim en az 2 karakter").max(50),
+  displayName: z.string().min(2, "Ad soyad en az 2 karakter").max(60),
+  username: z
+    .string()
+    .min(2, "Takma ad en az 2 karakter")
+    .max(30, "Takma ad en fazla 30 karakter")
+    .optional()
+    .or(z.literal("")),
   bio: z.string().max(1000, "Biyografi en fazla 1000 karakter").optional(),
   gender: z.enum(GENDERS).optional(),
   age: z.coerce

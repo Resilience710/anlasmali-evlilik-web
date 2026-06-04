@@ -47,6 +47,9 @@ export default async function MemberProfilePage({
           </Avatar>
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-2xl font-bold">{name}</h1>
+            {p?.username && (
+              <p className="text-sm text-primary">@{p.username}</p>
+            )}
             <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground sm:justify-start">
               {p?.gender && (
                 <span className="inline-flex items-center gap-1.5">

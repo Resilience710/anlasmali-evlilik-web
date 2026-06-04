@@ -20,6 +20,7 @@ export async function updateProfileAction(
 
   const parsed = profileSchema.safeParse({
     displayName: formData.get("displayName"),
+    username: formData.get("username") || undefined,
     bio: formData.get("bio") || undefined,
     gender: formData.get("gender") || undefined,
     age: formData.get("age") || undefined,
@@ -36,6 +37,7 @@ export async function updateProfileAction(
     where: { userId: session.user.id },
     update: {
       displayName: d.displayName,
+      username: d.username || null,
       bio: d.bio || null,
       gender: d.gender || null,
       age: d.age ?? null,
@@ -46,6 +48,7 @@ export async function updateProfileAction(
     create: {
       userId: session.user.id,
       displayName: d.displayName,
+      username: d.username || null,
       bio: d.bio || null,
       gender: d.gender || null,
       age: d.age ?? null,

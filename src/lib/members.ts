@@ -84,6 +84,7 @@ export async function getMemberProfile(id: string) {
       profile: {
         select: {
           displayName: true,
+          username: true,
           avatarUrl: true,
           gender: true,
           age: true,

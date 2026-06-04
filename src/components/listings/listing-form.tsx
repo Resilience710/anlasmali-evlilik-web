@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/image-upload";
 import type { ListingActionState } from "@/app/_actions/listings";
+import { LISTING_REQUIRES_APPROVAL } from "@/lib/constants";
 
 type Opt = { id: string; name: string };
 type Defaults = {
@@ -45,7 +46,18 @@ export function ListingForm({
 }) {
   const [state, formAction, pending] = useActionState(action, {});
   const fe = state.fieldErrors ?? {};
+  const v = state.values ?? {};
   const ages = Array.from({ length: 63 }, (_, i) => 18 + i);
+
+  // Hata sonrası girilen değer korunur; yoksa düzenleme varsayılanı kullanılır.
+  const title = v.title ?? defaults?.title;
+  const description = v.description ?? defaults?.description;
+  const categoryId = v.categoryId || defaults?.categoryId;
+  const cityId = v.cityId || defaults?.cityId;
+  const age = v.age || (defaults?.age ? String(defaults.age) : undefined);
+  const gender = v.gender || defaults?.gender;
+  const targetGender = v.targetGender || defaults?.targetGender;
+  const imageUrl = v.imageUrl || defaults?.imageUrl;
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -60,7 +72,7 @@ export function ListingForm({
         <Input
           id="title"
           name="title"
-          defaultValue={defaults?.title}
+          defaultValue={title}
           placeholder="Örn: Ciddi evlilik düşünen hayat arkadaşı arıyorum"
           className="mt-1.5"
           required
@@ -73,7 +85,7 @@ export function ListingForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="categoryId">Kategori</Label>
-          <Select name="categoryId" defaultValue={defaults?.categoryId}>
+          <Select name="categoryId" defaultValue={categoryId}>
             <SelectTrigger id="categoryId" className="mt-1.5">
               <SelectValue placeholder="Seçiniz" />
             </SelectTrigger>
@@ -91,7 +103,7 @@ export function ListingForm({
         </div>
         <div>
           <Label htmlFor="cityId">Şehir</Label>
-          <Select name="cityId" defaultValue={defaults?.cityId}>
+          <Select name="cityId" defaultValue={cityId}>
             <SelectTrigger id="cityId" className="mt-1.5">
               <SelectValue placeholder="Seçiniz" />
             </SelectTrigger>
@@ -112,7 +124,7 @@ export function ListingForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <Label htmlFor="age">Yaşınız</Label>
-          <Select name="age" defaultValue={defaults?.age ? String(defaults.age) : undefined}>
+          <Select name="age" defaultValue={age}>
             <SelectTrigger id="age" className="mt-1.5">
               <SelectValue placeholder="Seçiniz" />
             </SelectTrigger>
@@ -130,7 +142,7 @@ export function ListingForm({
         </div>
         <div>
           <Label htmlFor="gender">Cinsiyetiniz</Label>
-          <Select name="gender" defaultValue={defaults?.gender}>
+          <Select name="gender" defaultValue={gender}>
             <SelectTrigger id="gender" className="mt-1.5">
               <SelectValue placeholder="Seçiniz" />
             </SelectTrigger>
@@ -145,7 +157,7 @@ export function ListingForm({
         </div>
         <div>
           <Label htmlFor="targetGender">Aradığınız Kişi</Label>
-          <Select name="targetGender" defaultValue={defaults?.targetGender}>
+          <Select name="targetGender" defaultValue={targetGender}>
             <SelectTrigger id="targetGender" className="mt-1.5">
               <SelectValue placeholder="Seçiniz" />
             </SelectTrigger>
@@ -165,7 +177,7 @@ export function ListingForm({
         <Textarea
           id="description"
           name="description"
-          defaultValue={defaults?.description}
+          defaultValue={description}
           rows={6}
           placeholder="Kendiniz, beklentileriniz ve aradığınız kişi hakkında bilgi verin..."
           className="mt-1.5"
@@ -181,16 +193,18 @@ export function ListingForm({
         <div className="mt-1.5">
           <ImageUpload
             name="imageUrl"
-            defaultUrl={defaults?.imageUrl}
+            defaultUrl={imageUrl}
             label="Fotoğraf"
             rounded="lg"
           />
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface-2 px-4 py-3 text-xs text-muted-foreground">
-        İlanınız, güvenlik için yönetici onayından sonra yayınlanır.
-      </div>
+      {LISTING_REQUIRES_APPROVAL && (
+        <div className="rounded-lg border border-border bg-surface-2 px-4 py-3 text-xs text-muted-foreground">
+          İlanınız, güvenlik için yönetici onayından sonra yayınlanır.
+        </div>
+      )}
 
       <Button type="submit" size="lg" disabled={pending} className="self-start">
         {pending ? "Kaydediliyor..." : submitLabel}

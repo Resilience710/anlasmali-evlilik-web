@@ -23,6 +23,7 @@ function FieldError({ msg }: { msg?: string }) {
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState(registerAction, {});
   const fe = state.fieldErrors ?? {};
+  const v = state.values ?? {};
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -33,21 +34,50 @@ export function RegisterForm() {
         </div>
       )}
 
-      <div>
-        <Label htmlFor="displayName">Ad Soyad / Takma Ad</Label>
-        <Input id="displayName" name="displayName" className="mt-1.5" required />
-        <FieldError msg={fe.displayName?.[0]} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="displayName">Ad Soyad</Label>
+          <Input
+            id="displayName"
+            name="displayName"
+            defaultValue={v.displayName}
+            placeholder="Örn: Ahmet Yılmaz"
+            className="mt-1.5"
+            required
+          />
+          <FieldError msg={fe.displayName?.[0]} />
+        </div>
+        <div>
+          <Label htmlFor="username">Takma Ad</Label>
+          <Input
+            id="username"
+            name="username"
+            defaultValue={v.username}
+            placeholder="Örn: ahmet_y"
+            className="mt-1.5"
+            required
+          />
+          <FieldError msg={fe.username?.[0]} />
+        </div>
       </div>
 
       <div>
         <Label htmlFor="email">E-posta</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" className="mt-1.5" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          defaultValue={v.email}
+          className="mt-1.5"
+          required
+        />
         <FieldError msg={fe.email?.[0]} />
       </div>
 
       <div>
         <Label htmlFor="gender">Cinsiyet</Label>
-        <Select name="gender">
+        <Select name="gender" defaultValue={v.gender || undefined}>
           <SelectTrigger id="gender" className="mt-1.5">
             <SelectValue placeholder="Seçiniz" />
           </SelectTrigger>
@@ -62,18 +92,37 @@ export function RegisterForm() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="password">Parola</Label>
-          <Input id="password" name="password" type="password" autoComplete="new-password" className="mt-1.5" required />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            className="mt-1.5"
+            required
+          />
           <FieldError msg={fe.password?.[0]} />
         </div>
         <div>
           <Label htmlFor="confirmPassword">Parola (Tekrar)</Label>
-          <Input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" className="mt-1.5" required />
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            className="mt-1.5"
+            required
+          />
           <FieldError msg={fe.confirmPassword?.[0]} />
         </div>
       </div>
 
       <label className="flex items-start gap-2 text-sm text-muted-foreground">
-        <input type="checkbox" name="acceptTerms" className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]" />
+        <input
+          type="checkbox"
+          name="acceptTerms"
+          defaultChecked={v.acceptTerms === "on"}
+          className="mt-0.5 h-4 w-4 accent-[var(--color-primary)]"
+        />
         <span>
           <Link href="/kullanim-sartlari" className="text-primary hover:underline">
             Kullanım Şartları
