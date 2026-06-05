@@ -22,6 +22,8 @@ export async function registerAction(
     displayName: formData.get("displayName"),
     username: formData.get("username"),
     email: formData.get("email"),
+    phone: formData.get("phone"),
+    cityId: formData.get("cityId"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
     gender: formData.get("gender"),
@@ -33,6 +35,8 @@ export async function registerAction(
     displayName: String(formData.get("displayName") ?? ""),
     username: String(formData.get("username") ?? ""),
     email: String(formData.get("email") ?? ""),
+    phone: String(formData.get("phone") ?? ""),
+    cityId: String(formData.get("cityId") ?? ""),
     gender: String(formData.get("gender") ?? ""),
     acceptTerms: formData.get("acceptTerms") === "on" ? "on" : "",
   };
@@ -62,6 +66,8 @@ export async function registerAction(
         create: {
           displayName: parsed.data.displayName,
           username: parsed.data.username,
+          phone: parsed.data.phone,
+          cityId: parsed.data.cityId,
           gender: parsed.data.gender,
         },
       },

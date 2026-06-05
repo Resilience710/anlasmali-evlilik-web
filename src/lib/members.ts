@@ -5,6 +5,11 @@ import { ONLINE_THRESHOLD_MS } from "@/lib/constants";
 export type MemberFilters = {
   sehir?: string; // city slug
   cinsiyet?: string; // MALE | FEMALE
+  medeni?: string; // medeni hal
+  vucut?: string; // vücut tipi
+  sigara?: string; // sigara
+  minAge?: number;
+  maxAge?: number;
   page?: number;
   perPage?: number;
 };
@@ -13,16 +18,22 @@ export async function getMembers(filters: MemberFilters) {
   const perPage = filters.perPage ?? 12;
   const page = Math.max(1, filters.page ?? 1);
 
+  const profileWhere: Prisma.ProfileWhereInput = {
+    ...(filters.cinsiyet ? { gender: filters.cinsiyet } : {}),
+    ...(filters.sehir ? { city: { slug: filters.sehir } } : {}),
+    ...(filters.medeni ? { maritalStatus: filters.medeni } : {}),
+    ...(filters.vucut ? { bodyType: filters.vucut } : {}),
+    ...(filters.sigara ? { smoking: filters.sigara } : {}),
+    ...(filters.minAge || filters.maxAge
+      ? { age: { gte: filters.minAge ?? 18, lte: filters.maxAge ?? 99 } }
+      : {}),
+  };
+
   const where: Prisma.UserWhereInput = {
     role: "USER",
     deletedAt: null,
     isBanned: false,
-    profile: {
-      is: {
-        ...(filters.cinsiyet ? { gender: filters.cinsiyet } : {}),
-        ...(filters.sehir ? { city: { slug: filters.sehir } } : {}),
-      },
-    },
+    profile: { is: profileWhere },
   };
 
   const [users, total] = await Promise.all([
@@ -42,6 +53,8 @@ export async function getMembers(filters: MemberFilters) {
             age: true,
             bio: true,
             city: { select: { name: true } },
+            maritalStatus: true,
+            bodyType: true,
           },
         },
         _count: {
@@ -65,6 +78,8 @@ export async function getMembers(filters: MemberFilters) {
       age: u.profile?.age ?? null,
       bio: u.profile?.bio ?? null,
       city: u.profile?.city?.name ?? null,
+      maritalStatus: u.profile?.maritalStatus ?? null,
+      bodyType: u.profile?.bodyType ?? null,
       listingCount: u._count.listings,
     })),
     total,
@@ -91,6 +106,16 @@ export async function getMemberProfile(id: string) {
           bio: true,
           lookingFor: true,
           city: { select: { name: true } },
+          profession: true,
+          jobTitle: true,
+          education: true,
+          maritalStatus: true,
+          bodyType: true,
+          zodiac: true,
+          height: true,
+          weight: true,
+          smoking: true,
+          alcohol: true,
         },
       },
     },

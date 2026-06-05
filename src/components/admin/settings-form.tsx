@@ -19,6 +19,7 @@ type Defaults = {
   contactPhone?: string | null;
   termsText?: string | null;
   privacyText?: string | null;
+  contactText?: string | null;
   happyCount: number;
   social: { facebook?: string; instagram?: string; x?: string; youtube?: string };
 };
@@ -104,6 +105,17 @@ export function SettingsForm({ defaults }: { defaults: Defaults }) {
             <Label htmlFor="contactPhone">İletişim Telefon</Label>
             <Input id="contactPhone" name="contactPhone" defaultValue={defaults.contactPhone ?? ""} className="mt-1.5" />
           </div>
+        </div>
+        <div>
+          <Label htmlFor="contactText">İletişim Sayfası Metni (sol taraf)</Label>
+          <Textarea
+            id="contactText"
+            name="contactText"
+            defaultValue={defaults.contactText ?? ""}
+            rows={4}
+            className="mt-1.5"
+            placeholder="Şikayet, reklam ve diğer talepleriniz için bize ulaşın..."
+          />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>

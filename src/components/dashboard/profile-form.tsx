@@ -14,6 +14,14 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import {
+  MARITAL_STATUSES,
+  BODY_TYPES,
+  EDUCATION_LEVELS,
+  SMOKING_OPTIONS,
+  ALCOHOL_OPTIONS,
+  ZODIAC_SIGNS,
+} from "@/lib/constants";
 
 type Defaults = {
   displayName?: string;
@@ -24,7 +32,48 @@ type Defaults = {
   lookingFor?: string | null;
   avatarUrl?: string | null;
   username?: string | null;
+  phone?: string | null;
+  profession?: string | null;
+  jobTitle?: string | null;
+  education?: string | null;
+  maritalStatus?: string | null;
+  bodyType?: string | null;
+  zodiac?: string | null;
+  height?: number | null;
+  weight?: number | null;
+  smoking?: string | null;
+  alcohol?: string | null;
 };
+
+function SelectField({
+  name,
+  label,
+  value,
+  options,
+}: {
+  name: string;
+  label: string;
+  value?: string | null;
+  options: readonly string[];
+}) {
+  return (
+    <div>
+      <Label htmlFor={name}>{label}</Label>
+      <Select name={name} defaultValue={value ?? undefined}>
+        <SelectTrigger id={name} className="mt-1.5">
+          <SelectValue placeholder="Seçiniz" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((o) => (
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 export function ProfileForm({
   cities,
@@ -141,6 +190,112 @@ export function ProfileForm({
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="border-t border-border pt-5">
+        <h3 className="mb-1 text-sm font-semibold text-muted-foreground">
+          Detay Bilgiler
+        </h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="phone">Telefon</Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              defaultValue={defaults.phone ?? ""}
+              placeholder="05XX XXX XX XX"
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label htmlFor="profession">Meslek</Label>
+            <Input
+              id="profession"
+              name="profession"
+              defaultValue={defaults.profession ?? ""}
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <Label htmlFor="jobTitle">Ünvan</Label>
+            <Input
+              id="jobTitle"
+              name="jobTitle"
+              defaultValue={defaults.jobTitle ?? ""}
+              className="mt-1.5"
+            />
+          </div>
+
+          <SelectField
+            name="education"
+            label="Eğitim"
+            value={defaults.education}
+            options={EDUCATION_LEVELS}
+          />
+          <SelectField
+            name="maritalStatus"
+            label="Medeni Hal"
+            value={defaults.maritalStatus}
+            options={MARITAL_STATUSES}
+          />
+          <SelectField
+            name="zodiac"
+            label="Burç"
+            value={defaults.zodiac}
+            options={ZODIAC_SIGNS}
+          />
+
+          <SelectField
+            name="bodyType"
+            label="Vücut Tipi"
+            value={defaults.bodyType}
+            options={BODY_TYPES}
+          />
+          <div>
+            <Label htmlFor="height">Boy (cm)</Label>
+            <Input
+              id="height"
+              name="height"
+              type="number"
+              min={120}
+              max={230}
+              defaultValue={defaults.height ?? ""}
+              className="mt-1.5"
+            />
+            {fe.height?.[0] && (
+              <p className="mt-1 text-xs text-destructive">{fe.height[0]}</p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="weight">Kilo (kg)</Label>
+            <Input
+              id="weight"
+              name="weight"
+              type="number"
+              min={30}
+              max={250}
+              defaultValue={defaults.weight ?? ""}
+              className="mt-1.5"
+            />
+            {fe.weight?.[0] && (
+              <p className="mt-1 text-xs text-destructive">{fe.weight[0]}</p>
+            )}
+          </div>
+
+          <SelectField
+            name="smoking"
+            label="Sigara"
+            value={defaults.smoking}
+            options={SMOKING_OPTIONS}
+          />
+          <SelectField
+            name="alcohol"
+            label="Alkol"
+            value={defaults.alcohol}
+            options={ALCOHOL_OPTIONS}
+          />
+        </div>
       </div>
 
       <div>

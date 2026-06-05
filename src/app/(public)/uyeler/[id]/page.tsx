@@ -90,6 +90,36 @@ export default async function MemberProfilePage({
         </div>
       </div>
 
+      {(() => {
+        const details: [string, string | null][] = [
+          ["Meslek", p?.profession ?? null],
+          ["Ünvan", p?.jobTitle ?? null],
+          ["Eğitim", p?.education ?? null],
+          ["Medeni Hal", p?.maritalStatus ?? null],
+          ["Vücut Tipi", p?.bodyType ?? null],
+          ["Burç", p?.zodiac ?? null],
+          ["Boy", p?.height ? `${p.height} cm` : null],
+          ["Kilo", p?.weight ? `${p.weight} kg` : null],
+          ["Sigara", p?.smoking ?? null],
+          ["Alkol", p?.alcohol ?? null],
+        ];
+        const shown = details.filter(([, val]) => val);
+        if (shown.length === 0) return null;
+        return (
+          <div className="mt-5 rounded-[var(--radius-card)] border border-border bg-surface p-6">
+            <h2 className="mb-4 font-semibold">Detaylar</h2>
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {shown.map(([label, val]) => (
+                <div key={label}>
+                  <dt className="text-xs text-muted-foreground">{label}</dt>
+                  <dd className="text-sm font-medium">{val}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        );
+      })()}
+
       <h2 className="mb-3 mt-6 text-lg font-semibold">
         {name} kullanıcısının ilanları
       </h2>

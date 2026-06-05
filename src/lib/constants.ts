@@ -11,6 +11,57 @@ export const GENDER_LABELS: Record<Gender, string> = {
   FEMALE: "Kadın",
 };
 
+// ---- Ek profil seçenekleri (değer = gösterilen metin, tek dil/TR) ----
+export const MARITAL_STATUSES = [
+  "Bekâr",
+  "Evli",
+  "Dul",
+  "Boşanmış",
+  "Ayrı yaşıyor",
+] as const;
+
+export const BODY_TYPES = [
+  "İnce yapılı",
+  "Normal",
+  "Balık etli",
+  "Atletik",
+  "Kaslı",
+  "Kilolu",
+] as const;
+
+export const EDUCATION_LEVELS = [
+  "İlkokul",
+  "Ortaokul",
+  "Lise",
+  "Önlisans",
+  "Lisans",
+  "Yüksek Lisans",
+  "Doktora",
+] as const;
+
+export const SMOKING_OPTIONS = ["Kullanmıyor", "Ara sıra", "Kullanıyor"] as const;
+
+export const ALCOHOL_OPTIONS = [
+  "Kullanmıyor",
+  "Sosyal içer",
+  "Kullanıyor",
+] as const;
+
+export const ZODIAC_SIGNS = [
+  "Koç",
+  "Boğa",
+  "İkizler",
+  "Yengeç",
+  "Aslan",
+  "Başak",
+  "Terazi",
+  "Akrep",
+  "Yay",
+  "Oğlak",
+  "Kova",
+  "Balık",
+] as const;
+
 export const LISTING_STATUSES = [
   "PENDING",
   "APPROVED",
@@ -71,9 +122,9 @@ export const MESSAGE_POLL_INTERVAL_MS = 4000;
 
 export const SITE_NAV = [
   { href: "/", label: "Ana Sayfa" },
+  { href: "/uyeler", label: "Üyeler" },
   { href: "/ilanlar", label: "İlanlar" },
   { href: "/hesabim/ilan-olustur", label: "İlan Oluştur" },
-  { href: "/uyeler", label: "Üyeler" },
   { href: "/hesabim/mesajlar", label: "Mesajlar" },
   { href: "/hakkimizda", label: "Hakkımızda" },
   { href: "/iletisim", label: "İletişim" },

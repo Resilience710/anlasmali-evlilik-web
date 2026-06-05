@@ -27,35 +27,48 @@ export async function updateProfileAction(
     cityId: formData.get("cityId") || undefined,
     lookingFor: formData.get("lookingFor") || undefined,
     avatarUrl: formData.get("avatarUrl") || "",
+    phone: formData.get("phone") || undefined,
+    profession: formData.get("profession") || undefined,
+    jobTitle: formData.get("jobTitle") || undefined,
+    education: formData.get("education") || undefined,
+    maritalStatus: formData.get("maritalStatus") || undefined,
+    bodyType: formData.get("bodyType") || undefined,
+    zodiac: formData.get("zodiac") || undefined,
+    height: formData.get("height") || undefined,
+    weight: formData.get("weight") || undefined,
+    smoking: formData.get("smoking") || undefined,
+    alcohol: formData.get("alcohol") || undefined,
   });
   if (!parsed.success) {
     return { fieldErrors: parsed.error.flatten().fieldErrors };
   }
 
   const d = parsed.data;
+  const detailData = {
+    displayName: d.displayName,
+    username: d.username || null,
+    bio: d.bio || null,
+    gender: d.gender || null,
+    age: d.age ?? null,
+    cityId: d.cityId || null,
+    lookingFor: d.lookingFor || null,
+    avatarUrl: d.avatarUrl || null,
+    phone: d.phone || null,
+    profession: d.profession || null,
+    jobTitle: d.jobTitle || null,
+    education: d.education || null,
+    maritalStatus: d.maritalStatus || null,
+    bodyType: d.bodyType || null,
+    zodiac: d.zodiac || null,
+    height: d.height ?? null,
+    weight: d.weight ?? null,
+    smoking: d.smoking || null,
+    alcohol: d.alcohol || null,
+  };
   await prisma.profile.upsert({
     where: { userId: session.user.id },
-    update: {
-      displayName: d.displayName,
-      username: d.username || null,
-      bio: d.bio || null,
-      gender: d.gender || null,
-      age: d.age ?? null,
-      cityId: d.cityId || null,
-      lookingFor: d.lookingFor || null,
-      avatarUrl: d.avatarUrl || null,
-    },
-    create: {
-      userId: session.user.id,
-      displayName: d.displayName,
-      username: d.username || null,
-      bio: d.bio || null,
-      gender: d.gender || null,
-      age: d.age ?? null,
-      cityId: d.cityId || null,
-      lookingFor: d.lookingFor || null,
-      avatarUrl: d.avatarUrl || null,
-    },
+    update: detailData,
+    create: { userId: session.user.id, ...detailData },
   });
 
   revalidatePath("/hesabim/profil");

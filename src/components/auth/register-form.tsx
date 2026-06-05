@@ -20,7 +20,11 @@ function FieldError({ msg }: { msg?: string }) {
   return <p className="mt-1 text-xs text-destructive">{msg}</p>;
 }
 
-export function RegisterForm() {
+export function RegisterForm({
+  cities,
+}: {
+  cities: { id: string; name: string }[];
+}) {
   const [state, formAction, pending] = useActionState(registerAction, {});
   const fe = state.fieldErrors ?? {};
   const v = state.values ?? {};
@@ -73,6 +77,39 @@ export function RegisterForm() {
           required
         />
         <FieldError msg={fe.email?.[0]} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="phone">Telefon</Label>
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            defaultValue={v.phone}
+            placeholder="05XX XXX XX XX"
+            className="mt-1.5"
+            required
+          />
+          <FieldError msg={fe.phone?.[0]} />
+        </div>
+        <div>
+          <Label htmlFor="cityId">Şehir</Label>
+          <Select name="cityId" defaultValue={v.cityId || undefined}>
+            <SelectTrigger id="cityId" className="mt-1.5">
+              <SelectValue placeholder="Seçiniz" />
+            </SelectTrigger>
+            <SelectContent>
+              {cities.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FieldError msg={fe.cityId?.[0]} />
+        </div>
       </div>
 
       <div>

@@ -17,6 +17,11 @@ export const registerSchema = z
       .min(2, "Takma ad en az 2 karakter olmalı")
       .max(30, "Takma ad en fazla 30 karakter"),
     email: z.string().email("Geçerli bir e-posta girin"),
+    phone: z
+      .string()
+      .min(7, "Telefon numarası gerekli")
+      .max(20, "Telefon numarası çok uzun"),
+    cityId: z.string().min(1, "Şehir seçin"),
     password: z
       .string()
       .min(8, "Parola en az 8 karakter olmalı")
@@ -51,6 +56,17 @@ export const profileSchema = z.object({
   cityId: z.string().optional(),
   lookingFor: z.enum(GENDERS).optional(),
   avatarUrl: z.string().url().optional().or(z.literal("")),
+  phone: z.string().max(20).optional().or(z.literal("")),
+  profession: z.string().max(60).optional().or(z.literal("")),
+  jobTitle: z.string().max(60).optional().or(z.literal("")),
+  education: z.string().max(40).optional().or(z.literal("")),
+  maritalStatus: z.string().max(30).optional().or(z.literal("")),
+  bodyType: z.string().max(30).optional().or(z.literal("")),
+  zodiac: z.string().max(20).optional().or(z.literal("")),
+  height: z.coerce.number().int().min(120).max(230).optional(),
+  weight: z.coerce.number().int().min(30).max(250).optional(),
+  smoking: z.string().max(20).optional().or(z.literal("")),
+  alcohol: z.string().max(20).optional().or(z.literal("")),
 });
 
 export const changePasswordSchema = z
@@ -128,6 +144,7 @@ export const siteSettingSchema = z.object({
   aboutText: z.string().max(5000).optional(),
   contactEmail: z.string().email().optional().or(z.literal("")),
   contactPhone: z.string().max(40).optional(),
+  contactText: z.string().max(3000).optional(),
   termsText: z.string().max(20000).optional(),
   privacyText: z.string().max(20000).optional(),
   happyCount: z.coerce.number().int().min(0).optional(),

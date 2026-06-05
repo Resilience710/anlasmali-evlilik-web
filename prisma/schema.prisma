@@ -57,11 +57,27 @@ model Profile {
   cityId      String?
   city        City?    @relation(fields: [cityId], references: [id])
   lookingFor  String?  // MALE | FEMALE
+
+  // Ek profil bilgileri
+  phone         String?
+  profession    String? // Meslek
+  jobTitle      String? // Ünvan
+  education     String? // Eğitim
+  maritalStatus String? // Medeni hal
+  bodyType      String? // Vücut tipi
+  zodiac        String? // Burç
+  height        Int? // Boy (cm)
+  weight        Int? // Kilo (kg)
+  smoking       String? // Sigara
+  alcohol       String? // Alkol
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([cityId])
   @@index([gender])
+  @@index([maritalStatus])
+  @@index([bodyType])
 }
 
 // ---------- Katalog (admin yönetir) ----------
@@ -214,6 +230,7 @@ model SiteSetting {
   aboutText    String?
   contactEmail String?
   contactPhone String?
+  contactText  String? // İletişim sayfası sol metni
   termsText    String?
   privacyText  String?
   faqJson      String? // JSON string: [{q,a}]

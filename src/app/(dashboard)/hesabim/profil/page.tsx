@@ -32,6 +32,17 @@ export default async function ProfilePage() {
             cityId: profile?.cityId,
             lookingFor: profile?.lookingFor,
             avatarUrl: profile?.avatarUrl,
+            phone: profile?.phone,
+            profession: profile?.profession,
+            jobTitle: profile?.jobTitle,
+            education: profile?.education,
+            maritalStatus: profile?.maritalStatus,
+            bodyType: profile?.bodyType,
+            zodiac: profile?.zodiac,
+            height: profile?.height,
+            weight: profile?.weight,
+            smoking: profile?.smoking,
+            alcohol: profile?.alcohol,
           }}
         />
       </div>

@@ -13,6 +13,8 @@ type Member = {
   age: number | null;
   bio: string | null;
   city: string | null;
+  maritalStatus?: string | null;
+  bodyType?: string | null;
   listingCount: number;
 };
 
@@ -47,6 +49,11 @@ export function MemberCard({ member }: { member: Member }) {
       {member.city && (
         <p className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <MapPin className="size-3.5" /> {member.city}
+        </p>
+      )}
+      {(member.maritalStatus || member.bodyType) && (
+        <p className="text-[0.7rem] text-muted-foreground">
+          {[member.maritalStatus, member.bodyType].filter(Boolean).join(" · ")}
         </p>
       )}
       <span className="mt-1 rounded-md bg-surface-2 px-2 py-0.5 text-[0.7rem] text-muted-foreground">

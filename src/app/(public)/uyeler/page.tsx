@@ -13,10 +13,16 @@ export default async function MembersPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const sp = await searchParams;
+  const [minAge, maxAge] = (sp.yas ?? "").split("-").map((n) => parseInt(n, 10));
   const [{ items, total, page, totalPages }, catalog] = await Promise.all([
     getMembers({
       sehir: sp.sehir,
       cinsiyet: sp.cinsiyet,
+      medeni: sp.medeni,
+      vucut: sp.vucut,
+      sigara: sp.sigara,
+      minAge: Number.isFinite(minAge) ? minAge : undefined,
+      maxAge: Number.isFinite(maxAge) ? maxAge : undefined,
       page: sp.page ? parseInt(sp.page, 10) : 1,
     }),
     getCatalog(),
@@ -32,7 +38,15 @@ export default async function MembersPage({
       <div className="mb-5">
         <MemberFilters
           cities={catalog.cities}
-          current={{ sehir: sp.sehir, cinsiyet: sp.cinsiyet }}
+          ageOptions={catalog.ageOptions}
+          current={{
+            sehir: sp.sehir,
+            cinsiyet: sp.cinsiyet,
+            yas: sp.yas,
+            medeni: sp.medeni,
+            vucut: sp.vucut,
+            sigara: sp.sigara,
+          }}
         />
       </div>
 
@@ -52,7 +66,14 @@ export default async function MembersPage({
         <Pagination
           page={page}
           totalPages={totalPages}
-          baseQuery={{ sehir: sp.sehir, cinsiyet: sp.cinsiyet }}
+          baseQuery={{
+            sehir: sp.sehir,
+            cinsiyet: sp.cinsiyet,
+            yas: sp.yas,
+            medeni: sp.medeni,
+            vucut: sp.vucut,
+            sigara: sp.sigara,
+          }}
         />
       </div>
     </div>
