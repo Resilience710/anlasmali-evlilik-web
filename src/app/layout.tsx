@@ -5,6 +5,7 @@ import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 import { getSiteSettings } from "@/lib/site";
 import { PresenceBeacon } from "@/components/presence-beacon";
+import { ConsentBanner } from "@/components/consent-banner";
 
 const sans = Plus_Jakarta_Sans({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default function RootLayout({
           showSpinner={false}
         />
         {children}
+        <ConsentBanner />
         <PresenceBeacon />
         <Toaster
           theme="dark"

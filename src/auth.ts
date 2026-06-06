@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations";
+import { emailVerificationEnabled } from "@/lib/email";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -28,6 +29,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.passwordHash
         );
         if (!valid) return null;
+
+        // E-posta doğrulama açıksa, doğrulanmamış hesapla giriş engellenir
+        if (emailVerificationEnabled() && !user.emailVerified) return null;
 
         // Son görülme zamanını güncelle (online göstergesi için)
         await prisma.user

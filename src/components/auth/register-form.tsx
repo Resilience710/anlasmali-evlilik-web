@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, MailCheck } from "lucide-react";
 import { registerAction } from "@/app/_actions/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,23 @@ export function RegisterForm({
   const [state, formAction, pending] = useActionState(registerAction, {});
   const fe = state.fieldErrors ?? {};
   const v = state.values ?? {};
+
+  // E-posta doğrulama açıkken kayıt sonrası başarı ekranı
+  if (state.success) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-4 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-success/15 text-success">
+          <MailCheck className="size-8" />
+        </span>
+        <p className="text-sm leading-relaxed text-foreground/90">
+          {state.success}
+        </p>
+        <Button asChild size="lg" className="mt-2 w-full">
+          <Link href="/giris">Giriş Sayfası</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

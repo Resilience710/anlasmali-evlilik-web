@@ -1,10 +1,12 @@
 "use server";
 
 import { AuthError } from "next-auth";
+import { headers } from "next/headers";
 import bcrypt from "bcryptjs";
 import { signIn, signOut, auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { registerSchema, changePasswordSchema } from "@/lib/validations";
+import { emailVerificationEnabled, sendVerificationEmail } from "@/lib/email";
 
 export type ActionState = {
   error?: string;
@@ -12,7 +14,24 @@ export type ActionState = {
   success?: string;
   // Hata olunca girilen değerleri geri yollar (parola hariç) -> form temizlenmez.
   values?: Record<string, string>;
+  needsVerification?: boolean;
 };
+
+// Doğrulama tokenı üretir, kaydeder ve e-postayı gönderir.
+async function sendVerifyTo(email: string) {
+  const token = crypto.randomUUID().replace(/-/g, "");
+  await prisma.verificationToken.create({
+    data: {
+      identifier: email,
+      token,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
+  });
+  const h = await headers();
+  const host = h.get("host") ?? "localhost:3100";
+  const proto = host.includes("localhost") ? "http" : "https";
+  await sendVerificationEmail(email, `${proto}://${host}/dogrula/${token}`);
+}
 
 export async function registerAction(
   _prev: ActionState,
@@ -55,12 +74,14 @@ export async function registerAction(
     return { error: "Bu e-posta zaten kayıtlı." };
   }
 
+  const verifyEnabled = emailVerificationEnabled();
   const passwordHash = await bcrypt.hash(parsed.data.password, 12);
   await prisma.user.create({
     data: {
       email,
       passwordHash,
       role: "USER",
+      emailVerified: verifyEnabled ? null : new Date(),
       lastSeenAt: new Date(),
       profile: {
         create: {
@@ -74,6 +95,16 @@ export async function registerAction(
     },
   });
 
+  // E-posta doğrulama AÇIK ise: doğrulama maili gönder, otomatik giriş YAPMA
+  if (verifyEnabled) {
+    await sendVerifyTo(email).catch(() => {});
+    return {
+      success:
+        "Hesabınız oluşturuldu! E-postanıza gönderdiğimiz doğrulama bağlantısına tıkladıktan sonra giriş yapabilirsiniz.",
+    };
+  }
+
+  // E-posta servisi yoksa otomatik giriş (mevcut davranış)
   try {
     await signIn("credentials", {
       email,
@@ -89,6 +120,26 @@ export async function registerAction(
   return {};
 }
 
+export async function resendVerificationAction(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const email = String(formData.get("email") ?? "").toLowerCase().trim();
+  if (!email) return { error: "E-posta gerekli." };
+  if (!emailVerificationEnabled()) {
+    return { success: "E-posta doğrulama şu anda devre dışı." };
+  }
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { emailVerified: true, deletedAt: true },
+  });
+  if (user && !user.deletedAt && !user.emailVerified) {
+    await sendVerifyTo(email).catch(() => {});
+  }
+  // Bilgi sızdırmamak için her durumda aynı mesaj
+  return { success: "Doğrulama bağlantısı e-posta adresinize tekrar gönderildi." };
+}
+
 export async function loginAction(
   _prev: ActionState,
   formData: FormData
@@ -96,6 +147,22 @@ export async function loginAction(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const callbackUrl = String(formData.get("callbackUrl") ?? "/hesabim");
+
+  // E-posta doğrulama açıksa, doğrulanmamış kullanıcıya net mesaj ver
+  if (emailVerificationEnabled()) {
+    const u = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      select: { emailVerified: true, deletedAt: true },
+    });
+    if (u && !u.deletedAt && !u.emailVerified) {
+      return {
+        error:
+          "E-postanız doğrulanmamış. Gelen kutunuzu kontrol edin ya da doğrulama bağlantısını tekrar gönderin.",
+        needsVerification: true,
+        values: { email },
+      };
+    }
+  }
 
   try {
     await signIn("credentials", {
