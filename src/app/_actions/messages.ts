@@ -7,8 +7,12 @@ import { auth } from "@/auth";
 import { messageSchema } from "@/lib/validations";
 import { getOrCreateConversation, canonicalPair } from "@/lib/conversations";
 import { getMissingProfileFields } from "@/lib/profile-completeness";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type MessageActionState = { error?: string };
+
+const MSG_TOO_FAST =
+  "Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyip tekrar deneyin.";
 
 async function requireCompleteProfile(userId: string) {
   const profile = await prisma.profile.findUnique({ where: { userId } });
@@ -28,6 +32,10 @@ export async function sendMessageAction(
 
   // Mesaj göndermeden önce profil eksiksiz olmalı
   await requireCompleteProfile(session.user.id);
+
+  if (!(await checkRateLimit(`msg:${session.user.id}`, 60, 60)).ok) {
+    return { error: MSG_TOO_FAST };
+  }
 
   const parsed = messageSchema.safeParse({
     recipientId: formData.get("recipientId"),
@@ -90,6 +98,10 @@ export async function replyAction(
 
   // Mesaj göndermeden önce profil eksiksiz olmalı
   await requireCompleteProfile(me);
+
+  if (!(await checkRateLimit(`msg:${me}`, 60, 60)).ok) {
+    return { error: MSG_TOO_FAST };
+  }
 
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return { error: "Mesaj boş olamaz." };

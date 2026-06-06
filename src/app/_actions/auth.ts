@@ -5,8 +5,27 @@ import { headers } from "next/headers";
 import bcrypt from "bcryptjs";
 import { signIn, signOut, auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { registerSchema, changePasswordSchema } from "@/lib/validations";
-import { emailVerificationEnabled, sendVerificationEmail } from "@/lib/email";
+import {
+  registerSchema,
+  changePasswordSchema,
+  resetPasswordSchema,
+} from "@/lib/validations";
+import {
+  emailVerificationEnabled,
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+} from "@/lib/email";
+import { rateLimitByIp } from "@/lib/rate-limit";
+
+const TOO_MANY = "Çok fazla deneme yaptınız. Lütfen biraz sonra tekrar deneyin.";
+
+// Mutlak URL üretir (e-posta bağlantıları için).
+async function absoluteUrl(path: string) {
+  const h = await headers();
+  const host = h.get("host") ?? "localhost:3100";
+  const proto = host.includes("localhost") ? "http" : "https";
+  return `${proto}://${host}${path}`;
+}
 
 export type ActionState = {
   error?: string;
@@ -19,6 +38,10 @@ export type ActionState = {
 
 // Doğrulama tokenı üretir, kaydeder ve e-postayı gönderir.
 async function sendVerifyTo(email: string) {
+  // Süresi dolmuş eski tokenları temizle (A7)
+  await prisma.verificationToken
+    .deleteMany({ where: { identifier: email, expires: { lt: new Date() } } })
+    .catch(() => {});
   const token = crypto.randomUUID().replace(/-/g, "");
   await prisma.verificationToken.create({
     data: {
@@ -27,16 +50,16 @@ async function sendVerifyTo(email: string) {
       expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
-  const h = await headers();
-  const host = h.get("host") ?? "localhost:3100";
-  const proto = host.includes("localhost") ? "http" : "https";
-  await sendVerificationEmail(email, `${proto}://${host}/dogrula/${token}`);
+  await sendVerificationEmail(email, await absoluteUrl(`/dogrula/${token}`));
 }
 
 export async function registerAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
+  if (!(await rateLimitByIp("register", 5, 60 * 60))) {
+    return { error: TOO_MANY };
+  }
   const raw = {
     displayName: formData.get("displayName"),
     username: formData.get("username"),
@@ -126,6 +149,9 @@ export async function resendVerificationAction(
 ): Promise<ActionState> {
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   if (!email) return { error: "E-posta gerekli." };
+  if (!(await rateLimitByIp("resend", 5, 60 * 60, email))) {
+    return { error: TOO_MANY };
+  }
   if (!emailVerificationEnabled()) {
     return { success: "E-posta doğrulama şu anda devre dışı." };
   }
@@ -147,6 +173,11 @@ export async function loginAction(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const callbackUrl = String(formData.get("callbackUrl") ?? "/hesabim");
+
+  // Brute-force koruması (IP + e-posta)
+  if (!(await rateLimitByIp("login", 10, 15 * 60, email.toLowerCase().trim()))) {
+    return { error: TOO_MANY, values: { email } };
+  }
 
   // E-posta doğrulama açıksa, doğrulanmamış kullanıcıya net mesaj ver
   if (emailVerificationEnabled()) {
@@ -189,27 +220,35 @@ export async function forgotPasswordAction(
 ): Promise<ActionState> {
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   if (!email) return { error: "E-posta gerekli." };
+  if (!(await rateLimitByIp("forgot", 5, 60 * 60, email))) {
+    return { error: TOO_MANY };
+  }
+
+  // Enumerasyonu önlemek için her durumda AYNI mesaj; link asla gösterilmez.
+  const generic: ActionState = {
+    success:
+      "Eğer bu e-posta kayıtlıysa, parola sıfırlama bağlantısı e-posta adresinize gönderildi.",
+  };
 
   const user = await prisma.user.findUnique({ where: { email } });
-  // Kullanıcı sayımını ele vermemek için her durumda başarı döndürürüz.
   if (user && !user.deletedAt) {
+    await prisma.verificationToken
+      .deleteMany({ where: { identifier: email, expires: { lt: new Date() } } })
+      .catch(() => {});
     const token = crypto.randomUUID().replace(/-/g, "");
-    const expires = new Date(Date.now() + 60 * 60 * 1000);
     await prisma.verificationToken.create({
-      data: { identifier: email, token, expires },
+      data: {
+        identifier: email,
+        token,
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+      },
     });
-    const link = `/sifre-sifirla/${token}`;
-    // Üretimde burada e-posta gönderilir. Geliştirmede bağlantıyı gösteriyoruz.
-    return {
-      success:
-        "Eğer bu e-posta kayıtlıysa sıfırlama bağlantısı gönderildi. (Geliştirme: " +
-        link +
-        ")",
-    };
+    await sendPasswordResetEmail(
+      email,
+      await absoluteUrl(`/sifre-sifirla/${token}`)
+    ).catch(() => {});
   }
-  return {
-    success: "Eğer bu e-posta kayıtlıysa sıfırlama bağlantısı gönderildi.",
-  };
+  return generic;
 }
 
 export async function resetPasswordAction(
@@ -217,10 +256,14 @@ export async function resetPasswordAction(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const newPassword = String(formData.get("newPassword") ?? "");
-  const confirmPassword = String(formData.get("confirmPassword") ?? "");
-  if (newPassword.length < 8) return { error: "Parola en az 8 karakter olmalı." };
-  if (newPassword !== confirmPassword) return { error: "Parolalar eşleşmiyor." };
+  const parsed = resetPasswordSchema.safeParse({
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
+  }
+  const newPassword = parsed.data.newPassword;
 
   const vt = await prisma.verificationToken.findUnique({ where: { token } });
   if (!vt || vt.expires < new Date()) {

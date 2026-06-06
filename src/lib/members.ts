@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { ONLINE_THRESHOLD_MS } from "@/lib/constants";
+import { clamp } from "@/lib/utils";
 
 export type MemberFilters = {
   sehir?: string; // city slug
@@ -15,8 +16,8 @@ export type MemberFilters = {
 };
 
 export async function getMembers(filters: MemberFilters) {
-  const perPage = filters.perPage ?? 12;
-  const page = Math.max(1, filters.page ?? 1);
+  const perPage = clamp(filters.perPage ?? 12, 1, 48);
+  const page = clamp(filters.page ?? 1, 1, 10000);
 
   const profileWhere: Prisma.ProfileWhereInput = {
     ...(filters.cinsiyet ? { gender: filters.cinsiyet } : {}),
@@ -45,6 +46,7 @@ export async function getMembers(filters: MemberFilters) {
       select: {
         id: true,
         lastSeenAt: true,
+        emailVerified: true,
         profile: {
           select: {
             displayName: true,
@@ -72,6 +74,7 @@ export async function getMembers(filters: MemberFilters) {
     items: users.map((u) => ({
       id: u.id,
       online: u.lastSeenAt ? u.lastSeenAt.getTime() >= since : false,
+      verified: !!u.emailVerified,
       displayName: u.profile?.displayName ?? "Üye",
       avatarUrl: u.profile?.avatarUrl ?? null,
       gender: u.profile?.gender ?? null,
@@ -96,6 +99,7 @@ export async function getMemberProfile(id: string) {
       id: true,
       createdAt: true,
       lastSeenAt: true,
+      emailVerified: true,
       profile: {
         select: {
           displayName: true,

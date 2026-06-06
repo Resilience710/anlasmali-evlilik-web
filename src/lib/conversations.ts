@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 /** İki kullanıcı için kanonik (sıralı) çift döndürür. */
 export function canonicalPair(a: string, b: string): [string, string] {
@@ -15,33 +16,20 @@ export async function getOrCreateConversation(meId: string, otherId: string) {
   return prisma.conversation.create({ data: { userAId, userBId } });
 }
 
-function lastReadFor(
-  conv: { userAId: string; lastReadA: Date | null; lastReadB: Date | null },
-  userId: string
-) {
-  return conv.userAId === userId ? conv.lastReadA : conv.lastReadB;
-}
-
 export async function getUnreadMessageTotal(userId: string): Promise<number> {
-  const convs = await prisma.conversation.findMany({
-    where: { OR: [{ userAId: userId }, { userBId: userId }] },
-    select: { id: true, userAId: true, lastReadA: true, lastReadB: true },
-  });
-  if (convs.length === 0) return 0;
-  const counts = await Promise.all(
-    convs.map((c) => {
-      const lastRead = lastReadFor(c, userId);
-      return prisma.message.count({
-        where: {
-          conversationId: c.id,
-          senderId: { not: userId },
-          deletedAt: null,
-          ...(lastRead ? { createdAt: { gt: lastRead } } : {}),
-        },
-      });
-    })
-  );
-  return counts.reduce((a, b) => a + b, 0);
+  // Tek sorgu (N+1 yok): her konuşmanın kendi lastRead eşiğine göre okunmamışlar.
+  const rows = await prisma.$queryRaw<{ total: bigint }[]>`
+    SELECT COUNT(*)::bigint AS total
+    FROM "Message" m
+    JOIN "Conversation" c ON m."conversationId" = c.id
+    WHERE m."deletedAt" IS NULL
+      AND m."senderId" <> ${userId}
+      AND (c."userAId" = ${userId} OR c."userBId" = ${userId})
+      AND m."createdAt" > COALESCE(
+        CASE WHEN c."userAId" = ${userId} THEN c."lastReadA" ELSE c."lastReadB" END,
+        '1970-01-01'::timestamp)
+  `;
+  return Number(rows[0]?.total ?? 0);
 }
 
 export async function getUserConversations(userId: string) {
@@ -65,34 +53,43 @@ export async function getUserConversations(userId: string) {
     },
   });
 
-  const result = await Promise.all(
-    convs.map(async (c) => {
-      const other = c.userAId === userId ? c.userB : c.userA;
-      const lastRead = lastReadFor(c, userId);
-      const unread = await prisma.message.count({
-        where: {
-          conversationId: c.id,
-          senderId: { not: userId },
-          deletedAt: null,
-          ...(lastRead ? { createdAt: { gt: lastRead } } : {}),
-        },
-      });
-      return {
-        id: c.id,
-        lastMessageAt: c.lastMessageAt,
-        other: {
-          id: other.id,
-          displayName: other.profile?.displayName ?? "Üye",
-          avatarUrl: other.profile?.avatarUrl ?? null,
-        },
-        lastMessage: c.messages[0]
-          ? { body: c.messages[0].body, senderId: c.messages[0].senderId }
-          : null,
-        unread,
-      };
-    })
-  );
-  return result;
+  // Okunmamış sayıları tek sorguda (N+1 yok)
+  const unreadMap = new Map<string, number>();
+  const convIds = convs.map((c) => c.id);
+  if (convIds.length) {
+    const rows = await prisma.$queryRaw<
+      { conversationId: string; cnt: bigint }[]
+    >`
+      SELECT m."conversationId" AS "conversationId", COUNT(*)::bigint AS cnt
+      FROM "Message" m
+      JOIN "Conversation" c ON m."conversationId" = c.id
+      WHERE m."deletedAt" IS NULL
+        AND m."senderId" <> ${userId}
+        AND c.id IN (${Prisma.join(convIds)})
+        AND m."createdAt" > COALESCE(
+          CASE WHEN c."userAId" = ${userId} THEN c."lastReadA" ELSE c."lastReadB" END,
+          '1970-01-01'::timestamp)
+      GROUP BY m."conversationId"
+    `;
+    for (const r of rows) unreadMap.set(r.conversationId, Number(r.cnt));
+  }
+
+  return convs.map((c) => {
+    const other = c.userAId === userId ? c.userB : c.userA;
+    return {
+      id: c.id,
+      lastMessageAt: c.lastMessageAt,
+      other: {
+        id: other.id,
+        displayName: other.profile?.displayName ?? "Üye",
+        avatarUrl: other.profile?.avatarUrl ?? null,
+      },
+      lastMessage: c.messages[0]
+        ? { body: c.messages[0].body, senderId: c.messages[0].senderId }
+        : null,
+      unread: unreadMap.get(c.id) ?? 0,
+    };
+  });
 }
 
 export async function getConversationForUser(
@@ -120,6 +117,9 @@ export async function getConversationForUser(
     return null;
   }
   const other = conv.userAId === userId ? conv.userB : conv.userA;
+  // Karşı tarafın okuma zamanı (okundu bilgisi için)
+  const otherLastRead =
+    conv.userAId === userId ? conv.lastReadB : conv.lastReadA;
   const messages = await prisma.message.findMany({
     where: { conversationId, deletedAt: null },
     orderBy: { createdAt: "asc" },
@@ -132,6 +132,7 @@ export async function getConversationForUser(
       displayName: other.profile?.displayName ?? "Üye",
       avatarUrl: other.profile?.avatarUrl ?? null,
     },
+    otherLastRead,
     messages,
   };
 }

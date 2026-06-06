@@ -1,6 +1,31 @@
 import { z } from "zod";
 import { GENDERS } from "./constants";
 
+// Ortak güçlü parola kuralı: 8-72 karakter + en az bir harf ve bir rakam.
+export const strongPassword = z
+  .string()
+  .min(8, "Parola en az 8 karakter olmalı")
+  .max(72, "Parola çok uzun")
+  .regex(/[A-Za-zÇĞİÖŞÜçğıöşü]/, "Parola en az bir harf içermeli")
+  .regex(/[0-9]/, "Parola en az bir rakam içermeli");
+
+// Görsel URL'i yalnızca güvenilir kaynaklardan kabul et (serbest dış URL/SSRF engeli).
+export function isAllowedImageUrl(url: string): boolean {
+  if (!url) return true;
+  if (url.startsWith("/uploads/")) return true;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && u.hostname === "res.cloudinary.com";
+  } catch {
+    return false;
+  }
+}
+
+export const imageUrlField = z
+  .string()
+  .optional()
+  .refine((u) => !u || isAllowedImageUrl(u), "Yalnızca yüklenen görseller kabul edilir");
+
 export const loginSchema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
   password: z.string().min(1, "Parola gerekli"),
@@ -22,10 +47,7 @@ export const registerSchema = z
       .min(7, "Telefon numarası gerekli")
       .max(20, "Telefon numarası çok uzun"),
     cityId: z.string().min(1, "Şehir seçin"),
-    password: z
-      .string()
-      .min(8, "Parola en az 8 karakter olmalı")
-      .max(72, "Parola çok uzun"),
+    password: strongPassword,
     confirmPassword: z.string(),
     gender: z.enum(GENDERS, { message: "Cinsiyet seçin" }),
     acceptTerms: z
@@ -55,7 +77,7 @@ export const profileSchema = z.object({
     .optional(),
   cityId: z.string().optional(),
   lookingFor: z.enum(GENDERS).optional(),
-  avatarUrl: z.string().url().optional().or(z.literal("")),
+  avatarUrl: imageUrlField,
   phone: z.string().max(20).optional().or(z.literal("")),
   profession: z.string().max(60).optional().or(z.literal("")),
   jobTitle: z.string().max(60).optional().or(z.literal("")),
@@ -72,7 +94,17 @@ export const profileSchema = z.object({
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Mevcut parola gerekli"),
-    newPassword: z.string().min(8, "Yeni parola en az 8 karakter"),
+    newPassword: strongPassword,
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: "Parolalar eşleşmiyor",
+    path: ["confirmPassword"],
+  });
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: strongPassword,
     confirmPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {
@@ -91,7 +123,7 @@ export const listingSchema = z.object({
   age: z.coerce.number().int().min(18, "En az 18").max(99),
   gender: z.enum(GENDERS, { message: "Cinsiyetinizi seçin" }),
   targetGender: z.enum(GENDERS, { message: "Aradığınız kişiyi seçin" }),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: imageUrlField,
 });
 
 export const messageSchema = z.object({

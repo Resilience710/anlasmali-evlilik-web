@@ -410,8 +410,11 @@ async function main() {
   });
 
   console.log("Seed tamamlandı ✓");
-  console.log(`Admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
-  console.log(`Demo üye örneği: elif-yilmaz@ornek.com / ${DEMO_PASSWORD}`);
+  console.log(`Admin e-postası: ${ADMIN_EMAIL}`);
+  console.log("Demo üye örneği: elif-yilmaz@ornek.com");
+  console.log(
+    "Parolalar güvenlik gereği loglanmıyor (SEED_ADMIN_PASSWORD env / DEMO_PASSWORD koddan)."
+  );
 }
 
 main()

@@ -13,6 +13,7 @@ import {
   Flag,
   BarChart3,
   Settings,
+  ScrollText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ const ITEMS = [
   { href: "/admin/mesajlar", label: "Mesajlar", icon: MessageSquare },
   { href: "/admin/sikayetler", label: "Şikayetler", icon: Flag },
   { href: "/admin/istatistikler", label: "İstatistikler", icon: BarChart3 },
+  { href: "/admin/loglar", label: "Denetim Kayıtları", icon: ScrollText },
   { href: "/admin/ayarlar", label: "Site Ayarları", icon: Settings },
 ];
 

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
+import { clamp } from "@/lib/utils";
 
 const listingCardSelect = {
   id: true,
@@ -36,44 +37,44 @@ export async function getRecentListings(limit = 5): Promise<ListingCard[]> {
 }
 
 export async function getCategorySidebar() {
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { order: "asc" },
-  });
-  const counts = await Promise.all(
-    categories.map((c) =>
-      prisma.listing.count({
-        where: { categoryId: c.id, status: "APPROVED", deletedAt: null },
-      })
-    )
-  );
-  const total = await prisma.listing.count({
-    where: { status: "APPROVED", deletedAt: null },
-  });
+  const [categories, grouped, total] = await Promise.all([
+    prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { order: "asc" },
+    }),
+    prisma.listing.groupBy({
+      by: ["categoryId"],
+      where: { status: "APPROVED", deletedAt: null },
+      _count: { _all: true },
+    }),
+    prisma.listing.count({ where: { status: "APPROVED", deletedAt: null } }),
+  ]);
+  const countMap = new Map(grouped.map((g) => [g.categoryId, g._count._all]));
   return {
     total,
-    categories: categories.map((c, i) => ({
+    categories: categories.map((c) => ({
       name: c.name,
       slug: c.slug,
-      count: counts[i],
+      count: countMap.get(c.id) ?? 0,
     })),
   };
 }
 
 export async function getCitySidebar(limit = 5) {
-  const cities = await prisma.city.findMany({
-    where: { isActive: true },
-    orderBy: { order: "asc" },
-  });
-  const counts = await Promise.all(
-    cities.map((c) =>
-      prisma.listing.count({
-        where: { cityId: c.id, status: "APPROVED", deletedAt: null },
-      })
-    )
-  );
+  const [cities, grouped] = await Promise.all([
+    prisma.city.findMany({
+      where: { isActive: true },
+      orderBy: { order: "asc" },
+    }),
+    prisma.listing.groupBy({
+      by: ["cityId"],
+      where: { status: "APPROVED", deletedAt: null },
+      _count: { _all: true },
+    }),
+  ]);
+  const countMap = new Map(grouped.map((g) => [g.cityId, g._count._all]));
   return cities
-    .map((c, i) => ({ name: c.name, slug: c.slug, count: counts[i] }))
+    .map((c) => ({ name: c.name, slug: c.slug, count: countMap.get(c.id) ?? 0 }))
     .sort((a, b) => b.count - a.count)
     .slice(0, limit);
 }
@@ -90,8 +91,8 @@ export type ListingFilters = {
 };
 
 export async function getListings(filters: ListingFilters) {
-  const perPage = filters.perPage ?? 12;
-  const page = Math.max(1, filters.page ?? 1);
+  const perPage = clamp(filters.perPage ?? 12, 1, 48);
+  const page = clamp(filters.page ?? 1, 1, 10000);
 
   const where: Prisma.ListingWhereInput = {
     status: "APPROVED",

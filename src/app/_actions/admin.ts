@@ -10,6 +10,7 @@ import {
   ageOptionSchema,
   siteSettingSchema,
 } from "@/lib/validations";
+import { logAudit } from "@/lib/audit";
 
 async function ensureAdmin() {
   const session = await auth();
@@ -27,7 +28,7 @@ export type AdminState = {
 
 // ---------- İlanlar ----------
 export async function approveListingAction(id: string) {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   const listing = await prisma.listing.update({
     where: { id },
     data: { status: "APPROVED", publishedAt: new Date(), rejectReason: null },
@@ -42,13 +43,18 @@ export async function approveListingAction(id: string) {
       linkUrl: `/ilanlar/${listing.slug}`,
     },
   });
+  await logAudit(adminId, "İlan onaylandı", {
+    targetType: "Listing",
+    targetId: id,
+    detail: listing.title,
+  });
   revalidatePath("/admin/ilanlar");
   revalidatePath("/");
   revalidatePath("/ilanlar");
 }
 
 export async function rejectListingAction(id: string, formData: FormData) {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   const reason = String(formData.get("reason") ?? "").slice(0, 300);
   const listing = await prisma.listing.update({
     where: { id },
@@ -64,15 +70,21 @@ export async function rejectListingAction(id: string, formData: FormData) {
       linkUrl: "/hesabim/ilanlarim",
     },
   });
+  await logAudit(adminId, "İlan reddedildi", {
+    targetType: "Listing",
+    targetId: id,
+    detail: reason || undefined,
+  });
   revalidatePath("/admin/ilanlar");
 }
 
 export async function adminDeleteListingAction(id: string) {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   await prisma.listing.update({
     where: { id },
     data: { deletedAt: new Date(), status: "ARCHIVED" },
   });
+  await logAudit(adminId, "İlan silindi", { targetType: "Listing", targetId: id });
   revalidatePath("/admin/ilanlar");
   revalidatePath("/ilanlar");
 }
@@ -116,16 +128,25 @@ export async function updateListingAdminAction(
 
 // ---------- Üyeler ----------
 export async function setUserBanAction(id: string, banned: boolean) {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   await prisma.user.update({ where: { id }, data: { isBanned: banned } });
+  await logAudit(adminId, banned ? "Üye yasaklandı" : "Üye yasağı kaldırıldı", {
+    targetType: "User",
+    targetId: id,
+  });
   revalidatePath("/admin/uyeler");
   revalidatePath(`/admin/uyeler/${id}`);
 }
 
 export async function setUserRoleAction(id: string, role: string) {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   if (role !== "USER" && role !== "ADMIN") return;
   await prisma.user.update({ where: { id }, data: { role } });
+  await logAudit(adminId, "Üye rolü değiştirildi", {
+    targetType: "User",
+    targetId: id,
+    detail: role,
+  });
   revalidatePath("/admin/uyeler");
   revalidatePath(`/admin/uyeler/${id}`);
 }
@@ -141,6 +162,7 @@ export async function adminDeleteUserAction(id: string) {
     where: { authorId: id },
     data: { deletedAt: new Date(), status: "ARCHIVED" },
   });
+  await logAudit(me, "Üye silindi", { targetType: "User", targetId: id });
   revalidatePath("/admin/uyeler");
 }
 
@@ -253,15 +275,24 @@ export async function resolveReportAction(id: string, status: string) {
     where: { id },
     data: { status, resolvedById: me },
   });
+  await logAudit(me, "Şikayet durumu güncellendi", {
+    targetType: "Report",
+    targetId: id,
+    detail: status,
+  });
   revalidatePath("/admin/sikayetler");
 }
 
 // ---------- Mesajlar ----------
 export async function adminDeleteMessageAction(id: string) {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   await prisma.message.update({
     where: { id },
     data: { deletedAt: new Date() },
+  });
+  await logAudit(adminId, "Mesaj silindi", {
+    targetType: "Message",
+    targetId: id,
   });
   revalidatePath("/admin/mesajlar");
 }
@@ -271,7 +302,7 @@ export async function updateSiteSettingsAction(
   _prev: AdminState,
   formData: FormData
 ): Promise<AdminState> {
-  await ensureAdmin();
+  const adminId = await ensureAdmin();
   const parsed = siteSettingSchema.safeParse({
     siteName: formData.get("siteName"),
     tagline: formData.get("tagline") || undefined,
@@ -331,6 +362,9 @@ export async function updateSiteSettingsAction(
     },
   });
 
+  await logAudit(adminId, "Site ayarları güncellendi", {
+    targetType: "SiteSetting",
+  });
   revalidatePath("/", "layout");
   return { success: "Site ayarları güncellendi." };
 }

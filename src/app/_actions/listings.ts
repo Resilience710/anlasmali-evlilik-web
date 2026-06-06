@@ -173,7 +173,8 @@ export async function deleteListingAction(listingId: string) {
     select: { authorId: true },
   });
   if (!existing || existing.authorId !== session.user.id) {
-    throw new Error("Yetkisiz işlem.");
+    // Yetkisiz/eksik kayıt: hata sayfası yerine sessizce listeye dön
+    redirect("/hesabim/ilanlarim");
   }
 
   await prisma.listing.update({

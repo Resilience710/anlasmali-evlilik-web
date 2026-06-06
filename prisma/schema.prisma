@@ -273,3 +273,26 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+// ---------- Rate limiting (DB tabanlı, sunucusuz uyumlu) ----------
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+// ---------- Admin denetim izi (KVKK) ----------
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  targetType String?
+  targetId   String?
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+}
