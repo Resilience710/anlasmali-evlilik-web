@@ -21,6 +21,10 @@ const statusVariant: Record<ListingStatus, "success" | "warning" | "destructive"
   ARCHIVED: "neutral",
 };
 
+// Onay sistemi kapalı (LISTING_REQUIRES_APPROVAL = false) olduğundan
+// "Onay Bekliyor" ve "Reddedildi" filtreleri gösterilmiyor.
+const VISIBLE_STATUSES: ListingStatus[] = ["APPROVED", "ARCHIVED"];
+
 export default async function AdminListingsPage({
   searchParams,
 }: {
@@ -59,7 +63,7 @@ export default async function AdminListingsPage({
         >
           Tümü
         </Link>
-        {LISTING_STATUSES.map((s) => (
+        {VISIBLE_STATUSES.map((s) => (
           <Link
             key={s}
             href={`/admin/ilanlar?status=${s}`}
