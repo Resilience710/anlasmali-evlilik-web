@@ -14,11 +14,15 @@ export async function GET(
 
   const conv = await prisma.conversation.findUnique({
     where: { id },
-    select: { userAId: true, userBId: true },
+    select: { userAId: true, userBId: true, lastReadA: true, lastReadB: true },
   });
   if (!conv || (conv.userAId !== session.user.id && conv.userBId !== session.user.id)) {
     return NextResponse.json({ error: "Bulunamadı." }, { status: 404 });
   }
+
+  // Karşı tarafın okuma zamanı (okundu bilgisi için)
+  const otherLastRead =
+    conv.userAId === session.user.id ? conv.lastReadB : conv.lastReadA;
 
   const messages = await prisma.message.findMany({
     where: { conversationId: id, deletedAt: null },
@@ -27,5 +31,8 @@ export async function GET(
     select: { id: true, senderId: true, body: true, createdAt: true },
   });
 
-  return NextResponse.json({ messages });
+  return NextResponse.json({
+    messages,
+    otherLastRead: otherLastRead ? otherLastRead.toISOString() : null,
+  });
 }

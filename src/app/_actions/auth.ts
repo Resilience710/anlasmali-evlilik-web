@@ -173,6 +173,7 @@ export async function loginAction(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const callbackUrl = String(formData.get("callbackUrl") ?? "/hesabim");
+  const remember = formData.get("remember") === "on" ? "1" : "0";
 
   // Brute-force koruması (IP + e-posta)
   if (!(await rateLimitByIp("login", 10, 15 * 60, email.toLowerCase().trim()))) {
@@ -199,6 +200,7 @@ export async function loginAction(
     await signIn("credentials", {
       email,
       password,
+      remember,
       redirectTo: callbackUrl || "/hesabim",
     });
   } catch (e) {

@@ -12,7 +12,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   const when = listing.publishedAt ?? listing.createdAt;
 
   return (
-    <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 transition-colors hover:border-primary/40">
+    <div className="card-hover flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 shadow-card">
       <div className="flex items-center gap-3">
         <Avatar className="h-12 w-12">
           {avatar && <AvatarImage src={avatar} alt={name} />}

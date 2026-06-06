@@ -81,6 +81,16 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
           />
         </div>
 
+        <label className="flex select-none items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            name="remember"
+            defaultChecked
+            className="size-4 cursor-pointer rounded border-border bg-surface-2 accent-primary"
+          />
+          Beni hatırla
+        </label>
+
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Giriş yapılıyor..." : "Giriş Yap"}
         </Button>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin, BadgeCheck } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { initials } from "@/lib/utils";
 import { GENDER_LABELS, type Gender } from "@/lib/constants";
@@ -15,6 +15,7 @@ type Member = {
   city: string | null;
   maritalStatus?: string | null;
   bodyType?: string | null;
+  verified?: boolean;
   listingCount: number;
 };
 
@@ -22,7 +23,7 @@ export function MemberCard({ member }: { member: Member }) {
   return (
     <Link
       href={`/uyeler/${member.id}`}
-      className="flex flex-col items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface p-5 text-center transition-colors hover:border-primary/40"
+      className="card-hover flex flex-col items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface p-5 text-center shadow-card"
     >
       <div className="relative">
         <Avatar className="h-20 w-20">
@@ -37,7 +38,12 @@ export function MemberCard({ member }: { member: Member }) {
           <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-surface bg-success" />
         )}
       </div>
-      <p className="font-semibold">{member.displayName}</p>
+      <p className="inline-flex items-center gap-1 font-semibold">
+        {member.displayName}
+        {member.verified && (
+          <BadgeCheck className="size-4 text-primary" aria-label="Doğrulanmış üye" />
+        )}
+      </p>
       <p className="text-xs text-muted-foreground">
         {[
           member.gender ? GENDER_LABELS[member.gender as Gender] : null,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Cake, User2, Search } from "lucide-react";
+import { MapPin, Cake, User2, Search, BadgeCheck } from "lucide-react";
 import { auth } from "@/auth";
 import { getMemberProfile } from "@/lib/members";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -46,7 +46,15 @@ export default async function MemberProfilePage({
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl font-bold">{name}</h1>
+            <h1 className="inline-flex items-center gap-1.5 text-2xl font-bold">
+              {name}
+              {data.user.emailVerified && (
+                <BadgeCheck
+                  className="size-5 text-primary"
+                  aria-label="Doğrulanmış üye"
+                />
+              )}
+            </h1>
             {p?.username && (
               <p className="text-sm text-primary">@{p.username}</p>
             )}

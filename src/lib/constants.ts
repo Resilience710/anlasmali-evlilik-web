@@ -118,7 +118,7 @@ export const LISTING_REQUIRES_APPROVAL = false;
 export const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
 
 /** Mesaj polling aralığı (ms) - yerel/fallback transport. */
-export const MESSAGE_POLL_INTERVAL_MS = 4000;
+export const MESSAGE_POLL_INTERVAL_MS = 2000;
 
 export const SITE_NAV = [
   { href: "/", label: "Ana Sayfa" },

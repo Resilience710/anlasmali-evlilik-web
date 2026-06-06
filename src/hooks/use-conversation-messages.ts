@@ -17,9 +17,13 @@ export type ThreadMessage = {
  */
 export function useConversationMessages(
   conversationId: string,
-  initial: ThreadMessage[]
+  initial: ThreadMessage[],
+  initialOtherLastRead: string | null = null
 ) {
   const [messages, setMessages] = useState<ThreadMessage[]>(initial);
+  const [otherLastRead, setOtherLastRead] = useState<string | null>(
+    initialOtherLastRead
+  );
 
   const refetch = useCallback(async () => {
     try {
@@ -30,6 +34,7 @@ export function useConversationMessages(
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages as ThreadMessage[]);
+        setOtherLastRead((data.otherLastRead as string | null) ?? null);
       }
     } catch {
       /* sessizce geç */
@@ -80,5 +85,5 @@ export function useConversationMessages(
     };
   }, [conversationId, refetch]);
 
-  return { messages, refetch };
+  return { messages, otherLastRead, refetch };
 }

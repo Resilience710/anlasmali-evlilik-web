@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import { Send } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Send, Check, CheckCheck } from "lucide-react";
 import { replyAction } from "@/app/_actions/messages";
 import {
   useConversationMessages,
@@ -19,19 +19,31 @@ export function MessageThread({
   conversationId,
   meId,
   initialMessages,
+  initialOtherLastRead = null,
 }: {
   conversationId: string;
   meId: string;
   initialMessages: ThreadMessage[];
+  initialOtherLastRead?: string | null;
 }) {
-  const { messages, refetch } = useConversationMessages(
+  const { messages, otherLastRead, refetch } = useConversationMessages(
     conversationId,
-    initialMessages
+    initialMessages,
+    initialOtherLastRead
   );
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const endRef = useRef<HTMLDivElement>(null);
+
+  // Bana ait son mesajın id'si (okundu rozetini yalnız ona koymak için)
+  const lastMineId = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].senderId === meId) return messages[i].id;
+    }
+    return null;
+  }, [messages, meId]);
+  const otherReadMs = otherLastRead ? new Date(otherLastRead).getTime() : 0;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -62,6 +74,9 @@ export function MessageThread({
         ) : (
           messages.map((m) => {
             const mine = m.senderId === meId;
+            const isLastMine = mine && m.id === lastMineId;
+            const seen =
+              mine && otherReadMs >= new Date(m.createdAt).getTime();
             return (
               <div
                 key={m.id}
@@ -78,12 +93,23 @@ export function MessageThread({
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
                   <span
                     className={cn(
-                      "mt-1 block text-right text-[0.65rem]",
+                      "mt-1 flex items-center justify-end gap-1 text-[0.65rem]",
                       mine ? "text-primary-foreground/70" : "text-muted-foreground"
                     )}
                   >
                     {clock(m.createdAt)}
+                    {mine &&
+                      (seen ? (
+                        <CheckCheck className="size-3.5" aria-label="Görüldü" />
+                      ) : (
+                        <Check className="size-3.5" aria-label="Gönderildi" />
+                      ))}
                   </span>
+                  {isLastMine && seen && (
+                    <span className="mt-0.5 block text-right text-[0.6rem] text-primary-foreground/70">
+                      Görüldü
+                    </span>
+                  )}
                 </div>
               </div>
             );

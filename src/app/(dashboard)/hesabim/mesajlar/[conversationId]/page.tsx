@@ -73,6 +73,9 @@ export default async function ThreadPage({
         conversationId={conversationId}
         meId={user.id}
         initialMessages={initialMessages}
+        initialOtherLastRead={
+          data.otherLastRead ? data.otherLastRead.toISOString() : null
+        }
       />
     </div>
   );

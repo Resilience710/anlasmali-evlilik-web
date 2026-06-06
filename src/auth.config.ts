@@ -9,13 +9,17 @@ export const authConfig = {
   pages: {
     signIn: "/giris",
   },
-  session: { strategy: "jwt" },
+  // Varsayılan oturum süresi 30 gün ("Beni hatırla" işaretli);
+  // işaretsizken auth.ts'deki özel jwt.encode bunu 1 güne kısaltır.
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   providers: [], // auth.ts içinde doldurulur
   callbacks: {
     jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;
         token.role = user.role ?? "USER";
+        // "Beni hatırla": varsayılan true; yalnız açıkça false ise kısa oturum
+        token.remember = user.remember !== false;
       }
       return token;
     },

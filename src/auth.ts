@@ -1,18 +1,34 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import { encode as defaultEncode } from "next-auth/jwt";
 import bcrypt from "bcryptjs";
 import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations";
 import { emailVerificationEnabled } from "@/lib/email";
 
+const REMEMBER_MAX_AGE = 30 * 24 * 60 * 60; // 30 gün
+const SHORT_MAX_AGE = 24 * 60 * 60; // 1 gün
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  // "Beni hatırla" işaretsizse JWT süresini kısalt (varsayılan davranış değişmez).
+  jwt: {
+    encode: (params) => {
+      const remember = (params.token as { remember?: boolean } | undefined)
+        ?.remember;
+      return defaultEncode({
+        ...params,
+        maxAge: remember === false ? SHORT_MAX_AGE : REMEMBER_MAX_AGE,
+      });
+    },
+  },
   providers: [
     Credentials({
       credentials: {
         email: { label: "E-posta", type: "email" },
         password: { label: "Parola", type: "password" },
+        remember: { label: "Beni hatırla", type: "text" },
       },
       authorize: async (credentials) => {
         const parsed = loginSchema.safeParse(credentials);
@@ -43,6 +59,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: email.split("@")[0],
           role: user.role,
+          remember: credentials?.remember !== "0",
         };
       },
     }),
