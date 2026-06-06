@@ -19,7 +19,7 @@ export function MainNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "relative px-3 py-2 text-sm font-medium transition-colors hover:text-foreground",
+              "relative whitespace-nowrap px-3 py-2 text-sm font-medium transition-colors hover:text-foreground",
               active ? "text-primary" : "text-muted-foreground"
             )}
           >

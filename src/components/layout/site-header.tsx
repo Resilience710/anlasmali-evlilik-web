@@ -83,7 +83,7 @@ export async function SiteHeader() {
 
         {/* Online göstergesi */}
         <div className="hidden items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 xl:flex">
-          <span className="text-right leading-tight">
+          <span className="text-center leading-tight">
             <span className="block text-[0.65rem] text-muted-foreground">
               Şu anda aktif
             </span>

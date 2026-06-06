@@ -52,8 +52,8 @@ export function ProfileDropdown({
           {avatarUrl && <AvatarImage src={avatarUrl} alt={name} />}
           <AvatarFallback>{initials(name)}</AvatarFallback>
         </Avatar>
-        <span className="hidden flex-col items-start leading-tight sm:flex">
-          <span className="text-sm font-medium">{name}</span>
+        <span className="hidden flex-col items-center text-center leading-tight sm:flex">
+          <span className="whitespace-nowrap text-sm font-medium">{name}</span>
           <span className="text-[0.7rem] text-muted-foreground">Profilim</span>
         </span>
         <ChevronDown className="size-4 text-muted-foreground" />
