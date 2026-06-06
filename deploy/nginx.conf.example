@@ -1,0 +1,36 @@
+# ALTERNATİF: nginx reverse proxy.
+# DİKKAT: CyberPanel OpenLiteSpeed zaten 80/443'ü kullanır. nginx kullanacaksan
+# önce OLS'i durdurmalısın (systemctl stop lsws). Önerilen yol OLS proxy'dir
+# (deploy/openlitespeed-vhost.conf). Bu dosya yalnızca nginx tercih edenler için.
+#
+# /etc/nginx/conf.d/anlasmalievlilik.conf olarak kaydet, sonra: nginx -t && systemctl reload nginx
+# SSL için: certbot --nginx -d anlasmalievlilik.com -d www.anlasmalievlilik.com
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name anlasmalievlilik.com www.anlasmalievlilik.com;
+
+    # certbot HTTP->HTTPS yönlendirmesini otomatik ekler
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 60s;
+    }
+
+    # Next.js statik dosyaları için uzun cache (opsiyonel performans)
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_cache_valid 200 60m;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    client_max_body_size 12M;  # görsel yükleme limiti
+}

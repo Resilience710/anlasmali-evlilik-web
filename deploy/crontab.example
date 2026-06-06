@@ -1,0 +1,5 @@
+# VPS crontab — Vercel cron'unun yerine günlük temizlik.
+# Kurmak için:  crontab -e   ve aşağıdaki satırı ekle.
+# BURAYA_CRON_SECRET değerini .env dosyandaki CRON_SECRET ile birebir aynı yap.
+
+0 3 * * * curl -s -H "Authorization: Bearer BURAYA_CRON_SECRET" https://anlasmalievlilik.com/api/cron/cleanup >/dev/null 2>&1
