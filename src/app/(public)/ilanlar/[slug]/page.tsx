@@ -23,7 +23,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const listing = await getListingBySlug(slug);
-  return { title: listing?.title ?? "İlan" };
+  // Yayında olmayan ilanların başlığı metadata'da sızmasın
+  return {
+    title: listing && listing.status === "APPROVED" ? listing.title : "İlan",
+  };
 }
 
 export default async function ListingDetailPage({

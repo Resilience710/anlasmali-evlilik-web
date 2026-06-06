@@ -18,13 +18,18 @@ export async function toggleFavoriteAction(listingId: string) {
   if (existing) {
     await prisma.favorite.delete({ where: { id: existing.id } });
   } else {
-    await prisma.favorite.create({ data: { userId, listingId } });
-    // İlan sahibine bildirim
+    // Yalnızca yayında olan (silinmemiş, onaylı) ilanlar favorilenebilir
     const listing = await prisma.listing.findUnique({
       where: { id: listingId },
-      select: { authorId: true, title: true },
+      select: { authorId: true, title: true, status: true, deletedAt: true },
     });
-    if (listing && listing.authorId !== userId) {
+    if (!listing || listing.deletedAt || listing.status !== "APPROVED") {
+      revalidatePath("/hesabim/favorilerim");
+      return;
+    }
+    await prisma.favorite.create({ data: { userId, listingId } });
+    // İlan sahibine bildirim
+    if (listing.authorId !== userId) {
       await prisma.notification.create({
         data: {
           userId: listing.authorId,
@@ -57,6 +62,21 @@ export async function reportAction(
     detail: formData.get("detail") || undefined,
   });
   if (!parsed.success) return { error: "Lütfen bir sebep seçin." };
+
+  // Hedefin gerçekten var olduğunu doğrula (geçersiz ID ile sahte şikayet engellenir)
+  if (parsed.data.targetType === "LISTING") {
+    const exists = await prisma.listing.findFirst({
+      where: { id: parsed.data.listingId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!exists) return { error: "Şikayet edilen ilan bulunamadı." };
+  } else if (parsed.data.targetType === "USER") {
+    const exists = await prisma.user.findFirst({
+      where: { id: parsed.data.reportedUserId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!exists) return { error: "Şikayet edilen kullanıcı bulunamadı." };
+  }
 
   await prisma.report.create({
     data: {

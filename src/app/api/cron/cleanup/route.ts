@@ -5,12 +5,15 @@ import { prisma } from "@/lib/prisma";
 // Vercel Cron, CRON_SECRET ayarlıysa Authorization: Bearer <secret> gönderir.
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const authz = req.headers.get("authorization");
-    const key = new URL(req.url).searchParams.get("key");
-    if (authz !== `Bearer ${secret}` && key !== secret) {
-      return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
-    }
+  // Secret yapılandırılmamışsa endpoint kapalıdır (dışarıdan tetiklemeyi engelle).
+  // Vercel Cron, CRON_SECRET tanımlıysa Authorization: Bearer <secret> gönderir.
+  if (!secret) {
+    return NextResponse.json({ error: "Yapılandırılmamış." }, { status: 401 });
+  }
+  const authz = req.headers.get("authorization");
+  const key = new URL(req.url).searchParams.get("key");
+  if (authz !== `Bearer ${secret}` && key !== secret) {
+    return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
   }
 
   const now = new Date();

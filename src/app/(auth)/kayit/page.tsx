@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RegisterForm } from "@/components/auth/register-form";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +15,7 @@ export default async function RegisterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Üye Ol</CardTitle>
+        <h1 className="text-2xl font-bold tracking-tight">Üye Ol</h1>
         <p className="text-sm text-muted-foreground">
           Ücretsiz üye olun, hayat arkadaşınızı bulun.
         </p>

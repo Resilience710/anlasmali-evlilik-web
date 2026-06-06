@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Check, X, Trash2 } from "lucide-react";
 import {
   approveListingAction,

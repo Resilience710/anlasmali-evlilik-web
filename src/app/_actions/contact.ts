@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { contactSchema } from "@/lib/validations";
+import { rateLimitByIp } from "@/lib/rate-limit";
 
 export type ContactState = { error?: string; success?: string };
 
@@ -9,6 +10,13 @@ export async function contactAction(
   _prev: ContactState,
   formData: FormData
 ): Promise<ContactState> {
+  // Spam koruması: IP başına saatte 5 mesaj
+  if (!(await rateLimitByIp("contact", 5, 60 * 60))) {
+    return {
+      error: "Çok fazla mesaj gönderdiniz. Lütfen biraz sonra tekrar deneyin.",
+    };
+  }
+
   const parsed = contactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
