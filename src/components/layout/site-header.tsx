@@ -82,18 +82,13 @@ export async function SiteHeader() {
         <div className="flex-1" />
 
         {/* Online göstergesi */}
-        <div className="hidden items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 xl:flex">
-          <span className="text-center leading-tight">
-            <span className="block text-[0.65rem] text-muted-foreground">
-              Şu anda aktif
-            </span>
-            <span className="block text-xs font-semibold text-success">
-              {formatCount(online)} kişi online
-            </span>
-          </span>
+        <div className="hidden items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 xl:flex">
           <span className="relative flex h-2.5 w-2.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
+          </span>
+          <span className="whitespace-nowrap text-xs font-semibold text-success">
+            {formatCount(online)} kişi aktif
           </span>
         </div>
 
