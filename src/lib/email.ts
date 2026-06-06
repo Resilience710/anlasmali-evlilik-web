@@ -1,8 +1,8 @@
-// E-posta gönderimi. RESEND_API_KEY varsa Resend ile gerçek e-posta gönderir;
-// yoksa (geliştirme) sadece konsola yazar ve özellik "kapalı" sayılır.
+// E-posta gönderimi (Brevo). BREVO_API_KEY varsa gerçek e-posta gönderir;
+// yoksa (geliştirme) sadece konsola yazar ve doğrulama "kapalı" sayılır.
 
 export function emailVerificationEnabled(): boolean {
-  return !!(process.env.BREVO_API_KEY || process.env.RESEND_API_KEY);
+  return !!process.env.BREVO_API_KEY;
 }
 
 function parseFrom(from: string): { name: string; email: string } {
@@ -13,9 +13,9 @@ function parseFrom(from: string): { name: string; email: string } {
 
 async function sendEmail(to: string, subject: string, html: string) {
   const from =
-    process.env.EMAIL_FROM || "anlaşmalievlilik.com <onboarding@resend.dev>";
+    process.env.EMAIL_FROM || "anlaşmalievlilik.com <noreply@anlasmalievlilik.net>";
 
-  // 1) Brevo (daha yüksek ücretsiz limit)
+  // Brevo
   if (process.env.BREVO_API_KEY) {
     const sender = parseFrom(from);
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -39,24 +39,7 @@ async function sendEmail(to: string, subject: string, html: string) {
     return res.json();
   }
 
-  // 2) Resend
-  if (process.env.RESEND_API_KEY) {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from, to, subject, html }),
-    });
-    if (!res.ok) {
-      const t = await res.text().catch(() => "");
-      throw new Error(`E-posta gönderilemedi (Resend): ${t}`);
-    }
-    return res.json();
-  }
-
-  // 3) Anahtar yok -> geliştirme: sadece logla
+  // Anahtar yok -> geliştirme: sadece logla
   console.log(`[DEV E-POSTA] Alıcı: ${to} | Konu: ${subject}`);
   return { dev: true };
 }
