@@ -2,30 +2,63 @@
 // yoksa (geliştirme) sadece konsola yazar ve özellik "kapalı" sayılır.
 
 export function emailVerificationEnabled(): boolean {
-  return !!process.env.RESEND_API_KEY;
+  return !!(process.env.BREVO_API_KEY || process.env.RESEND_API_KEY);
+}
+
+function parseFrom(from: string): { name: string; email: string } {
+  const m = from.match(/^(.*)<(.+)>$/);
+  if (m) return { name: m[1].trim().replace(/"/g, ""), email: m[2].trim() };
+  return { name: "anlaşmalievlilik.com", email: from.trim() };
 }
 
 async function sendEmail(to: string, subject: string, html: string) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
-    console.log(`[DEV E-POSTA] Alıcı: ${to} | Konu: ${subject}`);
-    return { dev: true };
-  }
   const from =
     process.env.EMAIL_FROM || "anlaşmalievlilik.com <onboarding@resend.dev>";
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from, to, subject, html }),
-  });
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    throw new Error(`E-posta gönderilemedi: ${t}`);
+
+  // 1) Brevo (daha yüksek ücretsiz limit)
+  if (process.env.BREVO_API_KEY) {
+    const sender = parseFrom(from);
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender,
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      throw new Error(`E-posta gönderilemedi (Brevo): ${t}`);
+    }
+    return res.json();
   }
-  return res.json();
+
+  // 2) Resend
+  if (process.env.RESEND_API_KEY) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      throw new Error(`E-posta gönderilemedi (Resend): ${t}`);
+    }
+    return res.json();
+  }
+
+  // 3) Anahtar yok -> geliştirme: sadece logla
+  console.log(`[DEV E-POSTA] Alıcı: ${to} | Konu: ${subject}`);
+  return { dev: true };
 }
 
 export async function sendVerificationEmail(to: string, link: string) {
