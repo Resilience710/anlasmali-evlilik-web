@@ -5,8 +5,13 @@ import { ProfileForm } from "@/components/dashboard/profile-form";
 
 export const metadata: Metadata = { title: "Profil Bilgilerim" };
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ eksik?: string }>;
+}) {
   const user = await requireUser();
+  const sp = await searchParams;
   const [profile, cities] = await Promise.all([
     prisma.profile.findUnique({ where: { userId: user.id } }),
     prisma.city.findMany({ where: { isActive: true }, orderBy: { order: "asc" } }),
@@ -20,6 +25,11 @@ export default async function ProfilePage() {
           Profilinizi güncel tutarak daha çok ilgi çekin.
         </p>
       </div>
+      {sp.eksik && (
+        <div className="rounded-[var(--radius-card)] border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
+          İlan oluşturabilmek için lütfen tüm profil bilgilerinizi doldurun.
+        </div>
+      )}
       <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6">
         <ProfileForm
           cities={cities}

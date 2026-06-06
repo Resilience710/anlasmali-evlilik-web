@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { listingSchema } from "@/lib/validations";
 import { slugify, randomSuffix } from "@/lib/utils";
 import { LISTING_REQUIRES_APPROVAL } from "@/lib/constants";
+import { getMissingProfileFields } from "@/lib/profile-completeness";
 
 export type ListingActionState = {
   error?: string;
@@ -50,6 +51,14 @@ export async function createListingAction(
 ): Promise<ListingActionState> {
   const session = await auth();
   if (!session?.user?.id) redirect("/giris?callbackUrl=/hesabim/ilan-olustur");
+
+  // Profil eksikse ilan oluşturmaya izin verme -> profili tamamlamaya yönlendir
+  const profile = await prisma.profile.findUnique({
+    where: { userId: session.user.id },
+  });
+  if (getMissingProfileFields(profile).length > 0) {
+    redirect("/hesabim/profil?eksik=1");
+  }
 
   const parsed = listingSchema.safeParse(parseForm(formData));
   if (!parsed.success) {
