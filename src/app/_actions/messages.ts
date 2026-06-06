@@ -6,8 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { messageSchema } from "@/lib/validations";
 import { getOrCreateConversation, canonicalPair } from "@/lib/conversations";
+import { getMissingProfileFields } from "@/lib/profile-completeness";
 
 export type MessageActionState = { error?: string };
+
+async function requireCompleteProfile(userId: string) {
+  const profile = await prisma.profile.findUnique({ where: { userId } });
+  if (getMissingProfileFields(profile).length > 0) {
+    redirect("/hesabim/profil?eksik=1");
+  }
+}
 
 export async function sendMessageAction(
   _prev: MessageActionState,
@@ -17,6 +25,9 @@ export async function sendMessageAction(
   if (!session?.user?.id) {
     redirect("/giris");
   }
+
+  // Mesaj göndermeden önce profil eksiksiz olmalı
+  await requireCompleteProfile(session.user.id);
 
   const parsed = messageSchema.safeParse({
     recipientId: formData.get("recipientId"),
@@ -76,6 +87,9 @@ export async function replyAction(
   const session = await auth();
   if (!session?.user?.id) redirect("/giris");
   const me = session.user.id;
+
+  // Mesaj göndermeden önce profil eksiksiz olmalı
+  await requireCompleteProfile(me);
 
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return { error: "Mesaj boş olamaz." };

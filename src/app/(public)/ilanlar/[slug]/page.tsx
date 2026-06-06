@@ -13,6 +13,7 @@ import { ReportDialog } from "@/components/listings/report-dialog";
 import { MessageCompose } from "@/components/messaging/message-compose";
 import { Badge } from "@/components/ui/badge";
 import { LISTING_STATUS_LABELS, GENDER_LABELS } from "@/lib/constants";
+import { getMissingProfileFields } from "@/lib/profile-completeness";
 import { initials, timeAgo } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -59,6 +60,12 @@ export default async function ListingDetailPage({
       where: { userId_listingId: { userId, listingId: listing.id } },
     });
     isFavorited = !!fav;
+  }
+
+  let profileIncomplete = false;
+  if (userId && !isOwner) {
+    const myProfile = await prisma.profile.findUnique({ where: { userId } });
+    profileIncomplete = getMissingProfileFields(myProfile).length > 0;
   }
 
   const authorName = listing.author.profile?.displayName ?? "Üye";
@@ -139,6 +146,17 @@ export default async function ListingDetailPage({
                 veya{" "}
                 <Link href="/kayit" className="font-medium text-primary hover:underline">
                   üye olun
+                </Link>
+                .
+              </div>
+            ) : profileIncomplete ? (
+              <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm">
+                Mesaj gönderebilmek için önce{" "}
+                <Link
+                  href="/hesabim/profil?eksik=1"
+                  className="font-medium text-primary hover:underline"
+                >
+                  profil bilgilerinizi tamamlayın
                 </Link>
                 .
               </div>
