@@ -93,7 +93,7 @@ export default async function ListingDetailPage({
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* İçerik */}
         <div className="flex flex-col gap-5">
-          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+          <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
             <div className="flex items-center gap-2">
               <CategoryBadge
                 name={listing.category.name}
@@ -125,13 +125,13 @@ export default async function ListingDetailPage({
               </span>
             </div>
 
-            <p className="mt-5 whitespace-pre-line leading-relaxed text-foreground/90">
+            <p className="mt-5 whitespace-pre-line break-words leading-relaxed text-foreground/90">
               {listing.description}
             </p>
           </div>
 
           {/* Mesaj bölümü */}
-          <div id="mesaj" className="rounded-[var(--radius-card)] border border-border bg-surface p-6 scroll-mt-20">
+          <div id="mesaj" className="rounded-[var(--radius-card)] border border-border bg-surface p-4 scroll-mt-20 sm:p-6">
             <h2 className="text-lg font-semibold">İletişime Geç</h2>
             {isOwner ? (
               <p className="mt-2 text-sm text-muted-foreground">

@@ -31,13 +31,13 @@ export default async function NotificationsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Bildirimlerim</h1>
         {hasUnread && <MarkAllReadButton />}
       </div>
 
       {notifications.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-10 text-center text-muted-foreground">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 text-center text-muted-foreground sm:p-10">
           Bildiriminiz yok.
         </div>
       ) : (

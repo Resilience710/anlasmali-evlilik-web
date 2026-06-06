@@ -37,7 +37,7 @@ export default async function MemberProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-      <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6">
+      <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
           <Avatar className="h-24 w-24">
             {p?.avatarUrl && <AvatarImage src={p.avatarUrl} alt={name} />}
@@ -85,7 +85,7 @@ export default async function MemberProfilePage({
               Üyelik: {timeAgo(data.user.createdAt)}
             </p>
             {p?.bio && (
-              <p className="mt-3 text-sm text-foreground/90">{p.bio}</p>
+              <p className="mt-3 break-words text-sm text-foreground/90">{p.bio}</p>
             )}
           </div>
           {!isSelf && (
@@ -114,7 +114,7 @@ export default async function MemberProfilePage({
         const shown = details.filter(([, val]) => val);
         if (shown.length === 0) return null;
         return (
-          <div className="mt-5 rounded-[var(--radius-card)] border border-border bg-surface p-6">
+          <div className="mt-5 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
             <h2 className="mb-4 font-semibold">Detaylar</h2>
             <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
               {shown.map(([label, val]) => (

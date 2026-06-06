@@ -23,7 +23,7 @@ export function MemberCard({ member }: { member: Member }) {
   return (
     <Link
       href={`/uyeler/${member.id}`}
-      className="card-hover flex flex-col items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface p-5 text-center shadow-card"
+      className="card-hover flex w-full min-w-0 flex-col items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface p-3 text-center shadow-card sm:p-5"
     >
       <div className="relative">
         <Avatar className="h-20 w-20">
@@ -38,10 +38,13 @@ export function MemberCard({ member }: { member: Member }) {
           <span className="absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-surface bg-success" />
         )}
       </div>
-      <p className="inline-flex items-center gap-1 font-semibold">
-        {member.displayName}
+      <p className="flex max-w-full items-center justify-center gap-1 font-semibold">
+        <span className="truncate">{member.displayName}</span>
         {member.verified && (
-          <BadgeCheck className="size-4 text-primary" aria-label="Doğrulanmış üye" />
+          <BadgeCheck
+            className="size-4 shrink-0 text-primary"
+            aria-label="Doğrulanmış üye"
+          />
         )}
       </p>
       <p className="text-xs text-muted-foreground">

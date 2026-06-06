@@ -40,7 +40,7 @@ export default function RootLayout({
       lang="tr"
       className={`${sans.variable} ${display.variable} dark h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-background text-foreground">
         <NextTopLoader
           color="#f97316"
           height={3}

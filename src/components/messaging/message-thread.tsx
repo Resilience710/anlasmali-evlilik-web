@@ -65,7 +65,7 @@ export function MessageThread({
   }
 
   return (
-    <div className="flex h-[60vh] flex-col rounded-[var(--radius-card)] border border-border bg-surface">
+    <div className="flex h-[70dvh] flex-col rounded-[var(--radius-card)] border border-border bg-surface sm:h-[60vh]">
       <div className="flex-1 space-y-2 overflow-y-auto scroll-thin p-4">
         {messages.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">

@@ -46,14 +46,14 @@ export default async function AdminUsersPage({
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Üyeler</h1>
-        <form className="flex gap-2">
+        <form className="flex w-full gap-2 sm:w-auto">
           <input
             name="q"
             defaultValue={sp.q}
             placeholder="E-posta veya isim ara"
-            className="h-9 rounded-lg border border-border bg-surface-2 px-3 text-sm focus-visible:border-primary focus-visible:outline-none"
+            className="h-10 flex-1 rounded-lg border border-border bg-surface-2 px-3 text-base focus-visible:border-primary focus-visible:outline-none sm:h-9 sm:w-56 sm:flex-none sm:text-sm"
           />
-          <button className="rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground cursor-pointer">
+          <button className="shrink-0 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground cursor-pointer">
             Ara
           </button>
         </form>

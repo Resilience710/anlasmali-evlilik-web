@@ -16,7 +16,7 @@ export default async function MessagesPage() {
       <h1 className="text-2xl font-bold">Mesajlarım</h1>
 
       {conversations.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-10 text-center text-muted-foreground">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 text-center text-muted-foreground sm:p-10">
           Henüz mesajınız yok. İlanlara göz atıp iletişime geçin.
         </div>
       ) : (

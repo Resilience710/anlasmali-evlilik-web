@@ -13,7 +13,7 @@ export default async function TermsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-bold">Kullanım Şartları</h1>
+      <h1 className="text-2xl font-bold sm:text-3xl">Kullanım Şartları</h1>
       <p className="mt-2 text-sm text-muted-foreground">Yürürlük tarihi: 2026</p>
 
       {custom ? (

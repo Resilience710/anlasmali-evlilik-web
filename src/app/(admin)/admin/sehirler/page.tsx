@@ -17,7 +17,7 @@ export default async function AdminCitiesPage() {
 
       <form
         action={upsertCityAction}
-        className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4"
+        className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
       >
         <div className="flex-1">
           <label className="text-sm text-muted-foreground">Şehir Adı</label>
@@ -39,7 +39,7 @@ export default async function AdminCitiesPage() {
           <form
             key={c.id}
             action={upsertCityAction}
-            className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4"
+            className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
           >
             <input type="hidden" name="id" value={c.id} />
             <div className="flex-1">

@@ -28,7 +28,7 @@ const CARDS = [
 export default function HelpPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-bold">Yardım</h1>
+      <h1 className="text-2xl font-bold sm:text-3xl">Yardım</h1>
       <p className="mt-2 text-muted-foreground">
         Size nasıl yardımcı olabiliriz?
       </p>

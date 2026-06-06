@@ -45,7 +45,7 @@ export default async function MyListingsPage() {
       </div>
 
       {listings.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-10 text-center">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 text-center sm:p-10">
           <p className="text-muted-foreground">Henüz ilanınız yok.</p>
           <Button asChild className="mt-4">
             <Link href="/hesabim/ilan-olustur">İlk İlanınızı Oluşturun</Link>
@@ -78,7 +78,7 @@ export default async function MyListingsPage() {
                     </p>
                   )}
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex flex-wrap gap-2 sm:shrink-0">
                   {status === "APPROVED" && (
                     <Button asChild variant="outline" size="sm">
                       <Link href={`/ilanlar/${l.slug}`}>

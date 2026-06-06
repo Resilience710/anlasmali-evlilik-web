@@ -25,17 +25,17 @@ export function Logo({
   }
 
   return (
-    <Link href="/" className="flex items-center gap-2.5">
+    <Link href="/" className="flex min-w-0 items-center gap-2.5">
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoUrl} alt={siteName} className="h-9 w-auto" />
+        <img src={logoUrl} alt={siteName} className="h-9 w-auto shrink-0" />
       ) : (
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
           <HeartHandshake className="size-6" />
         </span>
       )}
-      <span className="flex flex-col leading-none">
-        <span className="text-[1.05rem] font-bold tracking-tight">
+      <span className="flex min-w-0 flex-col leading-none">
+        <span className="truncate text-[1.05rem] font-bold tracking-tight">
           {mid ? (
             <>
               {pre}
@@ -47,7 +47,7 @@ export function Logo({
           )}
         </span>
         {!compact && (
-          <span className="mt-0.5 text-[0.7rem] text-muted-foreground">
+          <span className="mt-0.5 hidden truncate text-[0.7rem] text-muted-foreground sm:block">
             {tagline}
           </span>
         )}

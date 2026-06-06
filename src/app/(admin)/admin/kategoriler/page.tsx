@@ -18,7 +18,7 @@ export default async function AdminCategoriesPage() {
       {/* Yeni ekle */}
       <form
         action={upsertCategoryAction}
-        className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4"
+        className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
       >
         <div className="flex-1">
           <label className="text-sm text-muted-foreground">Kategori Adı</label>
@@ -41,7 +41,7 @@ export default async function AdminCategoriesPage() {
           <form
             key={c.id}
             action={upsertCategoryAction}
-            className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4"
+            className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
           >
             <input type="hidden" name="id" value={c.id} />
             <div className="flex-1">

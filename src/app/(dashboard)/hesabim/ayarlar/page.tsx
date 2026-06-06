@@ -31,7 +31,7 @@ export default async function SettingsPage() {
             </dd>
           </div>
         </dl>
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
             <Link href="/hesabim/profil">Profili Düzenle</Link>
           </Button>

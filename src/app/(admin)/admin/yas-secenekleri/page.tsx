@@ -20,7 +20,7 @@ export default async function AdminAgeOptionsPage() {
 
       <form
         action={upsertAgeOptionAction}
-        className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4"
+        className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
       >
         <div className="w-28">
           <label className="text-sm text-muted-foreground">Etiket</label>
@@ -50,7 +50,7 @@ export default async function AdminAgeOptionsPage() {
           <form
             key={o.id}
             action={upsertAgeOptionAction}
-            className="flex flex-wrap items-end gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4"
+            className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:flex-row sm:flex-wrap sm:items-end"
           >
             <input type="hidden" name="id" value={o.id} />
             <div className="w-28">

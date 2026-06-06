@@ -27,7 +27,7 @@ export function Pagination({
   );
 
   return (
-    <nav className="flex items-center justify-center gap-1.5">
+    <nav className="flex flex-wrap items-center justify-center gap-1.5">
       {page > 1 && (
         <Link
           href={makeHref(page - 1)}

@@ -46,7 +46,7 @@ export default async function FavoritesPage() {
       </div>
 
       {favorites.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-10 text-center">
+        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 text-center sm:p-10">
           <p className="text-muted-foreground">Henüz favori ilanınız yok.</p>
           <Button asChild className="mt-4">
             <Link href="/ilanlar">İlanlara Göz At</Link>

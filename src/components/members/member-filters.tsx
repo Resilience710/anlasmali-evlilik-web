@@ -56,7 +56,7 @@ export function MemberFilters({
 
   return (
     <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Select value={current.sehir ?? ALL} onValueChange={(v) => setParam("sehir", v)}>
           <SelectTrigger><SelectValue placeholder="Şehir" /></SelectTrigger>
           <SelectContent>
