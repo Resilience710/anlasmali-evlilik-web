@@ -1,11 +1,10 @@
 // İlan oluşturmadan önce profilin eksiksiz olmasını kontrol eder.
-// Not: Profil fotoğrafı (avatarUrl) şimdilik zorunlu tutulmadı; çünkü canlıda
-// (Vercel) görsel yükleme Cloudinary/VPS depolaması bağlanana kadar çalışmıyor.
-// Depolama hazır olunca avatarUrl'i de bu listeye ekleyebiliriz.
+// Cloudinary bağlı olduğu için profil fotoğrafı da artık zorunludur.
 
 export type ProfileLike = Record<string, unknown> | null | undefined;
 
 export const REQUIRED_PROFILE_FIELDS: { key: string; label: string }[] = [
+  { key: "avatarUrl", label: "Profil Fotoğrafı" },
   { key: "displayName", label: "Ad Soyad" },
   { key: "username", label: "Takma Ad" },
   { key: "phone", label: "Telefon" },
