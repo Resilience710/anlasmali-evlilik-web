@@ -69,6 +69,21 @@
 }
 
 @layer utilities {
+  /* Sayfa geçiş fade-in animasyonu */
+  @keyframes pageFade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .page-fade {
+    animation: pageFade 0.35s ease both;
+  }
+
   .text-gradient-primary {
     background: linear-gradient(
       90deg,

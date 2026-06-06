@@ -7,6 +7,12 @@ const ADMIN_EMAIL = "admin@anlasmalievlilik.com";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "Admin1234!";
 const DEMO_PASSWORD = "Demo1234!";
 
+const CONTACT_TEXT = `AnlaşmalıEvlilik.com olarak size yardımcı olmaktan mutluluk duyarız.
+
+Üyelik, ilan veya hesabınızla ilgili her türlü soru; şikâyet, öneri ve reklam / iş birliği talepleriniz için bize ulaşabilirsiniz. Sağdaki formu doldurmanız yeterli; dilerseniz e‑posta veya telefon ile de iletişime geçebilirsiniz.
+
+Ekibimiz mesajınıza genellikle 24 saat içinde dönüş yapar. Güvenliğiniz bizim için önceliklidir; şüpheli profil veya uygunsuz içerik bildirimlerinizi de bu sayfadan iletebilirsiniz.`;
+
 function slugify(input: string): string {
   const map: Record<string, string> = {
     ç: "c", Ç: "c", ğ: "g", Ğ: "g", ı: "i", İ: "i",
@@ -30,9 +36,10 @@ async function main() {
   // ---- SiteSetting ----
   await prisma.siteSetting.upsert({
     where: { id: "singleton" },
-    update: {},
+    update: { contactText: CONTACT_TEXT },
     create: {
       id: "singleton",
+      contactText: CONTACT_TEXT,
       siteName: "anlaşmalievlilik.com",
       tagline: "Ciddi İlişki, Mutlu Evlilik",
       heroTitle: "Hayat Arkadaşınızı AnlaşmalıEvlilik.com'da Bulun",
@@ -164,30 +171,78 @@ async function main() {
     { name: "Serkan Yavuz", gender: "MALE", age: 33, city: "İzmir", bio: "Ciddi, çalışkan ve aile değerlerine bağlıyım." },
   ];
 
+  // Zenginleştirme havuzları (index'e göre dağıtılır -> filtreler için çeşitlilik)
+  const PROFESSIONS = [
+    "Öğretmen", "Yazılım Mühendisi", "Doktor", "Hemşire", "Avukat",
+    "Muhasebeci", "Mimar", "Bankacı", "Esnaf", "Grafik Tasarımcı",
+    "Satış Uzmanı", "Pazarlama Uzmanı", "İşletmeci", "Diş Hekimi",
+    "Eczacı", "İnsan Kaynakları Uzmanı",
+  ];
+  const JOB_TITLES = [
+    "Uzman", "Kıdemli Uzman", "Müdür", "Takım Lideri", "Uzman Yardımcısı",
+    "Departman Müdürü", "Danışman", "Koordinatör",
+  ];
+  const EDUCATIONS = ["Lise", "Önlisans", "Lisans", "Yüksek Lisans", "Doktora"];
+  // Evlilik sitesi -> ağırlıklı bekâr
+  const MARITALS = ["Bekâr", "Bekâr", "Bekâr", "Boşanmış", "Dul", "Ayrı yaşıyor"];
+  const BODIES = ["İnce yapılı", "Normal", "Balık etli", "Atletik", "Kaslı", "Kilolu"];
+  const ZODIACS = [
+    "Koç", "Boğa", "İkizler", "Yengeç", "Aslan", "Başak",
+    "Terazi", "Akrep", "Yay", "Oğlak", "Kova", "Balık",
+  ];
+  const SMOKINGS = ["Kullanmıyor", "Ara sıra", "Kullanıyor"];
+  const ALCOHOLS = ["Kullanmıyor", "Sosyal içer", "Kullanıyor"];
+
   const demoUsers: { id: string; name: string; gender: string; city: string; age: number }[] = [];
   for (let i = 0; i < demoPeople.length; i++) {
     const p = demoPeople[i];
     const email = `${slugify(p.name)}@ornek.com`;
+    const isMale = p.gender === "MALE";
+    const lastSeen = i % 2 === 0 ? new Date() : hoursAgo(20);
+
     const u = await prisma.user.upsert({
       where: { email },
-      update: { lastSeenAt: i % 2 === 0 ? new Date() : hoursAgo(20) },
+      update: {
+        lastSeenAt: lastSeen,
+        role: "USER",
+        isBanned: false,
+        passwordHash: demoHash,
+      },
       create: {
         email,
         passwordHash: demoHash,
         role: "USER",
-        lastSeenAt: i % 2 === 0 ? new Date() : hoursAgo(20),
-        profile: {
-          create: {
-            displayName: p.name,
-            gender: p.gender,
-            age: p.age,
-            cityId: cities[p.city],
-            lookingFor: p.gender === "MALE" ? "FEMALE" : "MALE",
-            bio: p.bio,
-          },
-        },
+        lastSeenAt: lastSeen,
       },
     });
+
+    const profileData = {
+      displayName: p.name,
+      username: slugify(p.name).replace(/-/g, "_"),
+      gender: p.gender,
+      age: p.age,
+      cityId: cities[p.city],
+      lookingFor: isMale ? "FEMALE" : "MALE",
+      bio: p.bio,
+      phone: `0532 ${String(100 + i).padStart(3, "0")} ${String(10 + (i % 80)).padStart(2, "0")} ${String(20 + (i % 70)).padStart(2, "0")}`,
+      profession: PROFESSIONS[i % PROFESSIONS.length],
+      jobTitle: JOB_TITLES[i % JOB_TITLES.length],
+      education: EDUCATIONS[i % EDUCATIONS.length],
+      maritalStatus: MARITALS[i % MARITALS.length],
+      bodyType: BODIES[i % BODIES.length],
+      zodiac: ZODIACS[i % ZODIACS.length],
+      height: (isMale ? 172 : 160) + (i % 12),
+      weight: (isMale ? 72 : 56) + (i % 14),
+      smoking: SMOKINGS[i % SMOKINGS.length],
+      alcohol: ALCOHOLS[i % ALCOHOLS.length],
+    };
+
+    await prisma.profile.upsert({
+      where: { userId: u.id },
+      update: profileData,
+      create: { userId: u.id, ...profileData },
+    });
+
     demoUsers.push({ id: u.id, name: p.name, gender: p.gender, city: p.city, age: p.age });
   }
 

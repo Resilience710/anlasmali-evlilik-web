@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Sora } from "next/font/google";
 import { Toaster } from "sonner";
+import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 import { getSiteSettings } from "@/lib/site";
 import { PresenceBeacon } from "@/components/presence-beacon";
@@ -39,6 +40,12 @@ export default function RootLayout({
       className={`${sans.variable} ${display.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <NextTopLoader
+          color="#f97316"
+          height={3}
+          shadow="0 0 10px #f97316,0 0 5px #f97316"
+          showSpinner={false}
+        />
         {children}
         <PresenceBeacon />
         <Toaster
