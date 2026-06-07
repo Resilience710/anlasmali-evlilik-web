@@ -24,7 +24,7 @@ const ITEMS = [
   { href: "/admin/kategoriler", label: "Kategoriler", icon: Tags },
   { href: "/admin/sehirler", label: "Şehirler", icon: MapPin },
   { href: "/admin/yas-secenekleri", label: "Yaş Seçenekleri", icon: CalendarRange },
-  { href: "/admin/mesajlar", label: "Mesajlar", icon: MessageSquare },
+  { href: "/admin/mesajlar", label: "Mesaj Şikayetleri", icon: MessageSquare },
   { href: "/admin/sikayetler", label: "Şikayetler", icon: Flag },
   { href: "/admin/istatistikler", label: "İstatistikler", icon: BarChart3 },
   { href: "/admin/loglar", label: "Denetim Kayıtları", icon: ScrollText },

@@ -8,6 +8,7 @@ import { listingSchema } from "@/lib/validations";
 import { slugify, randomSuffix } from "@/lib/utils";
 import { LISTING_REQUIRES_APPROVAL } from "@/lib/constants";
 import { getMissingProfileFields } from "@/lib/profile-completeness";
+import { isUserBanned } from "@/lib/auth-guards";
 
 export type ListingActionState = {
   error?: string;
@@ -51,6 +52,9 @@ export async function createListingAction(
 ): Promise<ListingActionState> {
   const session = await auth();
   if (!session?.user?.id) redirect("/giris?callbackUrl=/hesabim/ilan-olustur");
+
+  // Yasaklı kullanıcı ilan oluşturamaz
+  if (await isUserBanned(session.user.id)) redirect("/hesap-askida");
 
   // Profil eksikse ilan oluşturmaya izin verme -> profili tamamlamaya yönlendir
   const profile = await prisma.profile.findUnique({
@@ -120,6 +124,7 @@ export async function updateListingAction(
 ): Promise<ListingActionState> {
   const session = await auth();
   if (!session?.user?.id) redirect("/giris");
+  if (await isUserBanned(session.user.id)) redirect("/hesap-askida");
 
   const existing = await prisma.listing.findUnique({
     where: { id: listingId },

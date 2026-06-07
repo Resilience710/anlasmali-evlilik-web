@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getMembers } from "@/lib/members";
 import { getCatalog } from "@/lib/listings";
+import { redirectIfBanned } from "@/lib/auth-guards";
 import { MemberCard } from "@/components/members/member-card";
 import { MemberFilters } from "@/components/members/member-filters";
 import { Pagination } from "@/components/ui/pagination";
@@ -12,6 +13,7 @@ export default async function MembersPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  await redirectIfBanned();
   const sp = await searchParams;
   const [minAge, maxAge] = (sp.yas ?? "").split("-").map((n) => parseInt(n, 10));
   const [{ items, total, page, totalPages }, catalog] = await Promise.all([

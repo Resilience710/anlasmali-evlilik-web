@@ -8,6 +8,7 @@ import { messageSchema } from "@/lib/validations";
 import { getOrCreateConversation, canonicalPair } from "@/lib/conversations";
 import { getMissingProfileFields } from "@/lib/profile-completeness";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { isUserBanned } from "@/lib/auth-guards";
 
 export type MessageActionState = { error?: string };
 
@@ -29,6 +30,9 @@ export async function sendMessageAction(
   if (!session?.user?.id) {
     redirect("/giris");
   }
+
+  // Yasaklı kullanıcı mesaj gönderemez
+  if (await isUserBanned(session.user.id)) redirect("/hesap-askida");
 
   // Mesaj göndermeden önce profil eksiksiz olmalı
   await requireCompleteProfile(session.user.id);
@@ -95,6 +99,9 @@ export async function replyAction(
   const session = await auth();
   if (!session?.user?.id) redirect("/giris");
   const me = session.user.id;
+
+  // Yasaklı kullanıcı mesaj gönderemez
+  if (await isUserBanned(me)) redirect("/hesap-askida");
 
   // Mesaj göndermeden önce profil eksiksiz olmalı
   await requireCompleteProfile(me);

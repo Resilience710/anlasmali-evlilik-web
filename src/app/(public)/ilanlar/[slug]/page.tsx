@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Cake, MapPin, Clock, Eye, User2, Search } from "lucide-react";
 import { auth } from "@/auth";
+import { redirectIfBanned } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { getListingBySlug } from "@/lib/listings";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -34,6 +35,7 @@ export default async function ListingDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await redirectIfBanned();
   const { slug } = await params;
   const listing = await getListingBySlug(slug);
   if (!listing) notFound();

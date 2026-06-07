@@ -135,6 +135,7 @@ export const reportSchema = z.object({
   targetType: z.enum(["LISTING", "USER", "MESSAGE"]),
   listingId: z.string().optional(),
   reportedUserId: z.string().optional(),
+  messageId: z.string().optional(),
   reason: z.string().min(1, "Sebep seçin"),
   detail: z.string().max(1000).optional(),
 });

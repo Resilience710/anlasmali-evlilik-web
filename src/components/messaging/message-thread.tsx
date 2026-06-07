@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { Send, Check, CheckCheck } from "lucide-react";
+import { Send, Check, CheckCheck, Flag } from "lucide-react";
 import { replyAction } from "@/app/_actions/messages";
 import {
   useConversationMessages,
   type ThreadMessage,
 } from "@/hooks/use-conversation-messages";
 import { Button } from "@/components/ui/button";
+import { ReportDialog } from "@/components/listings/report-dialog";
 import { cn } from "@/lib/utils";
 
 function clock(iso: string) {
@@ -80,7 +81,10 @@ export function MessageThread({
             return (
               <div
                 key={m.id}
-                className={cn("flex", mine ? "justify-end" : "justify-start")}
+                className={cn(
+                  "group flex items-end gap-1",
+                  mine ? "justify-end" : "justify-start"
+                )}
               >
                 <div
                   className={cn(
@@ -111,6 +115,22 @@ export function MessageThread({
                     </span>
                   )}
                 </div>
+                {!mine && (
+                  <ReportDialog
+                    targetType="MESSAGE"
+                    messageId={m.id}
+                    trigger={
+                      <button
+                        type="button"
+                        aria-label="Mesajı şikayet et"
+                        title="Şikayet et"
+                        className="mb-1 shrink-0 cursor-pointer rounded-md p-1 text-muted-foreground/50 transition-colors hover:text-destructive"
+                      >
+                        <Flag className="size-3.5" />
+                      </button>
+                    }
+                  />
+                )}
               </div>
             );
           })

@@ -35,26 +35,40 @@ export function ReportDialog({
   targetType,
   listingId,
   reportedUserId,
+  messageId,
+  trigger,
 }: {
-  targetType: "LISTING" | "USER";
+  targetType: "LISTING" | "USER" | "MESSAGE";
   listingId?: string;
   reportedUserId?: string;
+  messageId?: string;
+  trigger?: React.ReactNode;
 }) {
   const [state, formAction, pending] = useActionState(reportAction, {});
   const [open, setOpen] = useState(false);
 
+  const targetLabel =
+    targetType === "LISTING"
+      ? "ilanı"
+      : targetType === "MESSAGE"
+      ? "mesajı"
+      : "kullanıcıyı";
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm text-muted-foreground transition-colors hover:bg-elevated hover:text-destructive cursor-pointer">
-        <Flag className="size-4" />
-        Şikayet Et
-      </DialogTrigger>
+      {trigger ? (
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <DialogTrigger className="inline-flex h-10 items-center gap-2 rounded-lg border border-border px-4 text-sm text-muted-foreground transition-colors hover:bg-elevated hover:text-destructive cursor-pointer">
+          <Flag className="size-4" />
+          Şikayet Et
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Şikayet Et</DialogTitle>
           <DialogDescription>
-            Bu {targetType === "LISTING" ? "ilanı" : "kullanıcıyı"} neden
-            şikayet ediyorsunuz?
+            Bu {targetLabel} neden şikayet ediyorsunuz?
           </DialogDescription>
         </DialogHeader>
         {state.success ? (
@@ -69,6 +83,9 @@ export function ReportDialog({
             )}
             {reportedUserId && (
               <input type="hidden" name="reportedUserId" value={reportedUserId} />
+            )}
+            {messageId && (
+              <input type="hidden" name="messageId" value={messageId} />
             )}
             <div>
               <Label>Sebep</Label>

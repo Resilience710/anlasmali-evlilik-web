@@ -5,11 +5,13 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { reportSchema } from "@/lib/validations";
+import { isUserBanned } from "@/lib/auth-guards";
 
 export async function toggleFavoriteAction(listingId: string) {
   const session = await auth();
   if (!session?.user?.id) redirect("/giris");
   const userId = session.user.id;
+  if (await isUserBanned(userId)) redirect("/hesap-askida");
 
   const existing = await prisma.favorite.findUnique({
     where: { userId_listingId: { userId, listingId } },
@@ -53,37 +55,63 @@ export async function reportAction(
 ): Promise<ReportState> {
   const session = await auth();
   if (!session?.user?.id) return { error: "Şikayet için giriş yapın." };
+  if (await isUserBanned(session.user.id)) redirect("/hesap-askida");
 
   const parsed = reportSchema.safeParse({
     targetType: formData.get("targetType"),
     listingId: formData.get("listingId") || undefined,
     reportedUserId: formData.get("reportedUserId") || undefined,
+    messageId: formData.get("messageId") || undefined,
     reason: formData.get("reason"),
     detail: formData.get("detail") || undefined,
   });
   if (!parsed.success) return { error: "Lütfen bir sebep seçin." };
 
+  let listingId = parsed.data.listingId;
+  let reportedUserId = parsed.data.reportedUserId;
+  let messageId = parsed.data.messageId;
+
   // Hedefin gerçekten var olduğunu doğrula (geçersiz ID ile sahte şikayet engellenir)
   if (parsed.data.targetType === "LISTING") {
     const exists = await prisma.listing.findFirst({
-      where: { id: parsed.data.listingId, deletedAt: null },
+      where: { id: listingId, deletedAt: null },
       select: { id: true },
     });
     if (!exists) return { error: "Şikayet edilen ilan bulunamadı." };
+    messageId = undefined;
   } else if (parsed.data.targetType === "USER") {
     const exists = await prisma.user.findFirst({
-      where: { id: parsed.data.reportedUserId, deletedAt: null },
+      where: { id: reportedUserId, deletedAt: null },
       select: { id: true },
     });
     if (!exists) return { error: "Şikayet edilen kullanıcı bulunamadı." };
+    messageId = undefined;
+  } else if (parsed.data.targetType === "MESSAGE") {
+    // Mesajı doğrula, şikayet edileni mesajın göndericisinden türet (güvenli)
+    const msg = await prisma.message.findFirst({
+      where: { id: messageId, deletedAt: null },
+      select: { id: true, senderId: true, conversation: { select: { userAId: true, userBId: true } } },
+    });
+    if (!msg) return { error: "Şikayet edilen mesaj bulunamadı." };
+    // Sadece konuşmanın tarafı şikayet edebilir
+    const inConv =
+      msg.conversation.userAId === session.user.id ||
+      msg.conversation.userBId === session.user.id;
+    if (!inConv) return { error: "Bu mesajı şikayet etme yetkiniz yok." };
+    if (msg.senderId === session.user.id)
+      return { error: "Kendi mesajınızı şikayet edemezsiniz." };
+    reportedUserId = msg.senderId;
+    messageId = msg.id;
+    listingId = undefined;
   }
 
   await prisma.report.create({
     data: {
       reporterId: session.user.id,
       targetType: parsed.data.targetType,
-      listingId: parsed.data.listingId,
-      reportedUserId: parsed.data.reportedUserId,
+      listingId,
+      reportedUserId,
+      messageId,
       reason: parsed.data.reason,
       detail: parsed.data.detail,
       status: "OPEN",

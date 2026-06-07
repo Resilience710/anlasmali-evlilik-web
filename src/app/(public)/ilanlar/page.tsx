@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getListings, getCatalog } from "@/lib/listings";
+import { redirectIfBanned } from "@/lib/auth-guards";
 import { ListingCard } from "@/components/listings/listing-card";
 import { ListingFilters } from "@/components/listings/listing-filters";
 import { Pagination } from "@/components/ui/pagination";
@@ -11,6 +12,7 @@ export default async function ListingsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  await redirectIfBanned();
   const sp = await searchParams;
   const [minAge, maxAge] = (sp.yas ?? "").split("-").map((n) => parseInt(n, 10));
 

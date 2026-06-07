@@ -170,6 +170,7 @@ model Message {
   body           String
   createdAt      DateTime     @default(now())
   deletedAt      DateTime?
+  reports        Report[]     @relation("ReportedMessage")
 
   @@index([conversationId, createdAt])
 }
@@ -213,6 +214,8 @@ model Report {
   listing        Listing? @relation("ReportedListing", fields: [listingId], references: [id], onDelete: SetNull)
   reportedUserId String?
   reportedUser   User?    @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: SetNull)
+  messageId      String?
+  message        Message? @relation("ReportedMessage", fields: [messageId], references: [id], onDelete: SetNull)
   resolvedById   String?
   createdAt      DateTime @default(now())
 

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { redirectIfBanned } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/site";
 import { getSiteStats } from "@/lib/stats";
@@ -21,6 +22,7 @@ import { InlineListingWizard } from "@/components/home/inline-listing-wizard";
 import { AccountPanel } from "@/components/home/account-panel";
 
 export default async function HomePage() {
+  await redirectIfBanned();
   const session = await auth();
   const userId = session?.user?.id;
 

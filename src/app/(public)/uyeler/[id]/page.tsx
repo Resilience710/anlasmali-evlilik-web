@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Cake, User2, Search, BadgeCheck } from "lucide-react";
 import { auth } from "@/auth";
+import { redirectIfBanned } from "@/lib/auth-guards";
 import { getMemberProfile } from "@/lib/members";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export default async function MemberProfilePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await redirectIfBanned();
   const { id } = await params;
   const data = await getMemberProfile(id);
   if (!data) notFound();
