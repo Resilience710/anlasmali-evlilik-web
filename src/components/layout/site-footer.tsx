@@ -35,6 +35,7 @@ function YoutubeIcon() {
 
 const FOOTER_LINKS = [
   { href: "/kullanim-sartlari", label: "Kullanım Şartları" },
+  { href: "/sorumluluk-reddi", label: "Sorumluluk Reddi" },
   { href: "/gizlilik-politikasi", label: "Gizlilik Politikası" },
   { href: "/yardim", label: "Yardım" },
   { href: "/sss", label: "SSS" },
