@@ -180,6 +180,7 @@ export const siteSettingSchema = z.object({
   contactText: z.string().max(3000).optional(),
   termsText: z.string().max(20000).optional(),
   privacyText: z.string().max(20000).optional(),
+  disclaimerText: z.string().max(20000).optional(),
   happyCount: z.coerce.number().int().min(0).optional(),
 });
 

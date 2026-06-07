@@ -245,6 +245,7 @@ model SiteSetting {
   contactText  String? // İletişim sayfası sol metni
   termsText    String?
   privacyText  String?
+  disclaimerText String? // Sorumluluk Reddi sayfası (admin düzenler)
   faqJson      String? // JSON string: [{q,a}]
   socialJson   String? // JSON string: {instagram, facebook, x, youtube}
   happyCount   Int      @default(0) // Mutlu Evlilik sayacı (admin elle ayarlar)

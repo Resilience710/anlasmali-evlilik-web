@@ -19,6 +19,7 @@ type Defaults = {
   contactPhone?: string | null;
   termsText?: string | null;
   privacyText?: string | null;
+  disclaimerText?: string | null;
   contactText?: string | null;
   happyCount: number;
   social: { facebook?: string; instagram?: string; x?: string; youtube?: string };
@@ -92,6 +93,17 @@ export function SettingsForm({ defaults }: { defaults: Defaults }) {
             <Label htmlFor="privacyText">Gizlilik Politikası</Label>
             <Textarea id="privacyText" name="privacyText" defaultValue={defaults.privacyText ?? ""} rows={4} className="mt-1.5" />
           </div>
+        </div>
+        <div>
+          <Label htmlFor="disclaimerText">Sorumluluk Reddi</Label>
+          <Textarea
+            id="disclaimerText"
+            name="disclaimerText"
+            defaultValue={defaults.disclaimerText ?? ""}
+            rows={6}
+            className="mt-1.5"
+            placeholder="Boş bırakılırsa hazır (varsayılan) metin gösterilir. Buraya yazarsanız sayfa bu metni gösterir."
+          />
         </div>
       </Section>
 

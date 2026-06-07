@@ -24,6 +24,7 @@ export default async function AdminSettingsPage() {
           contactPhone: s.contactPhone,
           termsText: s.termsText,
           privacyText: s.privacyText,
+          disclaimerText: s.disclaimerText,
           contactText: s.contactText,
           happyCount: s.happyCount,
           social: s.social,

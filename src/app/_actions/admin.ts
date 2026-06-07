@@ -353,6 +353,7 @@ export async function updateSiteSettingsAction(
     contactText: formData.get("contactText") || undefined,
     termsText: formData.get("termsText") || undefined,
     privacyText: formData.get("privacyText") || undefined,
+    disclaimerText: formData.get("disclaimerText") || undefined,
     happyCount: formData.get("happyCount") || undefined,
   });
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
@@ -379,6 +380,7 @@ export async function updateSiteSettingsAction(
       contactText: d.contactText,
       termsText: d.termsText,
       privacyText: d.privacyText,
+      disclaimerText: d.disclaimerText,
       happyCount: d.happyCount ?? 0,
       socialJson: JSON.stringify(social),
     },
@@ -395,6 +397,7 @@ export async function updateSiteSettingsAction(
       contactText: d.contactText,
       termsText: d.termsText,
       privacyText: d.privacyText,
+      disclaimerText: d.disclaimerText,
       happyCount: d.happyCount ?? 0,
       socialJson: JSON.stringify(social),
     },

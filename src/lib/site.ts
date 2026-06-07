@@ -31,6 +31,7 @@ export const getSiteSettings = cache(async () => {
       contactText: null as string | null,
       termsText: null as string | null,
       privacyText: null as string | null,
+      disclaimerText: null as string | null,
       happyCount: 0,
       social: {} as SocialLinks,
       faq: [] as FaqItem[],

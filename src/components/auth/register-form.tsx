@@ -181,7 +181,15 @@ export function RegisterForm({
           <Link href="/kullanim-sartlari" className="text-primary hover:underline">
             Kullanım Şartları
           </Link>
-          ’nı okudum ve kabul ediyorum.
+          ,{" "}
+          <Link href="/sorumluluk-reddi" className="text-primary hover:underline">
+            Sorumluluk Reddi
+          </Link>{" "}
+          ve{" "}
+          <Link href="/gizlilik-politikasi" className="text-primary hover:underline">
+            Gizlilik Politikası
+          </Link>
+          ’nı okudum, onaylıyorum.
         </span>
       </label>
       <FieldError msg={fe.acceptTerms?.[0]} />
