@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   Users,
   FileText,
-  Clock,
   Flag,
   MessageSquare,
   UserCheck,
@@ -16,25 +15,16 @@ export const metadata: Metadata = { title: "Yönetim Paneli" };
 
 export default async function AdminDashboard() {
   const stats = await getAdminStats();
-  const [pendingListings, openReports] = await Promise.all([
-    prisma.listing.findMany({
-      where: { status: "PENDING", deletedAt: null },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { author: { select: { profile: { select: { displayName: true } } } } },
-    }),
-    prisma.report.findMany({
-      where: { status: "OPEN" },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-  ]);
+  const openReports = await prisma.report.findMany({
+    where: { status: "OPEN" },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
 
   const cards = [
     { icon: Users, label: "Toplam Üye", value: stats.totalUsers, href: "/admin/uyeler" },
     { icon: UserCheck, label: "Aktif (Online)", value: stats.online },
     { icon: FileText, label: "Toplam İlan", value: stats.totalListings, href: "/admin/ilanlar" },
-    { icon: Clock, label: "Onay Bekleyen", value: stats.pendingListings, href: "/admin/ilanlar?status=PENDING", accent: true },
     { icon: Flag, label: "Açık Şikayet", value: stats.openReports, href: "/admin/sikayetler", accent: true },
     { icon: MessageSquare, label: "Toplam Mesaj", value: stats.totalMessages, href: "/admin/mesajlar" },
   ];
@@ -72,52 +62,27 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold">Onay Bekleyen İlanlar</h2>
-            <Link href="/admin/ilanlar?status=PENDING" className="text-sm text-primary hover:underline">
-              Tümü
-            </Link>
-          </div>
-          {pendingListings.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Bekleyen ilan yok.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {pendingListings.map((l) => (
-                <li key={l.id} className="flex items-center justify-between gap-2 rounded-lg bg-surface-2 p-2.5 text-sm">
-                  <span className="min-w-0 truncate">{l.title}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {timeAgo(l.createdAt)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+      <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-semibold">Açık Şikayetler</h2>
+          <Link href="/admin/sikayetler" className="text-sm text-primary hover:underline">
+            Tümü
+          </Link>
         </div>
-
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold">Açık Şikayetler</h2>
-            <Link href="/admin/sikayetler" className="text-sm text-primary hover:underline">
-              Tümü
-            </Link>
-          </div>
-          {openReports.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Açık şikayet yok.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {openReports.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-2 rounded-lg bg-surface-2 p-2.5 text-sm">
-                  <span className="min-w-0 truncate">{r.reason}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {timeAgo(r.createdAt)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {openReports.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Açık şikayet yok.</p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {openReports.map((r) => (
+              <li key={r.id} className="flex items-center justify-between gap-2 rounded-lg bg-surface-2 p-2.5 text-sm">
+                <span className="min-w-0 truncate">{r.reason}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {timeAgo(r.createdAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
