@@ -36,6 +36,7 @@ export async function getUserConversations(userId: string) {
   const convs = await prisma.conversation.findMany({
     where: { OR: [{ userAId: userId }, { userBId: userId }] },
     orderBy: { lastMessageAt: "desc" },
+    take: 100,
     include: {
       userA: {
         select: {

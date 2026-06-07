@@ -39,19 +39,23 @@ export type AdminState = {
 // ---------- İlanlar ----------
 export async function approveListingAction(id: string) {
   const adminId = await ensureStaff();
-  const listing = await prisma.listing.update({
-    where: { id },
-    data: { status: "APPROVED", publishedAt: new Date(), rejectReason: null },
-    select: { authorId: true, title: true, slug: true },
-  });
-  await prisma.notification.create({
-    data: {
-      userId: listing.authorId,
-      type: "LISTING_APPROVED",
-      title: "İlanınız onaylandı",
-      body: `"${listing.title}" ilanınız yayına alındı.`,
-      linkUrl: `/ilanlar/${listing.slug}`,
-    },
+  // İlan güncelleme + bildirim tek transaction (kısmi durum kalmasın)
+  const listing = await prisma.$transaction(async (tx) => {
+    const l = await tx.listing.update({
+      where: { id },
+      data: { status: "APPROVED", publishedAt: new Date(), rejectReason: null },
+      select: { authorId: true, title: true, slug: true },
+    });
+    await tx.notification.create({
+      data: {
+        userId: l.authorId,
+        type: "LISTING_APPROVED",
+        title: "İlanınız onaylandı",
+        body: `"${l.title}" ilanınız yayına alındı.`,
+        linkUrl: `/ilanlar/${l.slug}`,
+      },
+    });
+    return l;
   });
   await logAudit(adminId, "İlan onaylandı", {
     targetType: "Listing",
@@ -66,19 +70,22 @@ export async function approveListingAction(id: string) {
 export async function rejectListingAction(id: string, formData: FormData) {
   const adminId = await ensureStaff();
   const reason = String(formData.get("reason") ?? "").slice(0, 300);
-  const listing = await prisma.listing.update({
-    where: { id },
-    data: { status: "REJECTED", rejectReason: reason || "Uygun bulunmadı." },
-    select: { authorId: true, title: true },
-  });
-  await prisma.notification.create({
-    data: {
-      userId: listing.authorId,
-      type: "LISTING_REJECTED",
-      title: "İlanınız reddedildi",
-      body: `"${listing.title}" ilanınız reddedildi. ${reason ? "Sebep: " + reason : ""}`,
-      linkUrl: "/hesabim/ilanlarim",
-    },
+  await prisma.$transaction(async (tx) => {
+    const l = await tx.listing.update({
+      where: { id },
+      data: { status: "REJECTED", rejectReason: reason || "Uygun bulunmadı." },
+      select: { authorId: true, title: true },
+    });
+    await tx.notification.create({
+      data: {
+        userId: l.authorId,
+        type: "LISTING_REJECTED",
+        title: "İlanınız reddedildi",
+        body: `"${l.title}" ilanınız reddedildi. ${reason ? "Sebep: " + reason : ""}`,
+        linkUrl: "/hesabim/ilanlarim",
+      },
+    });
+    return l;
   });
   await logAudit(adminId, "İlan reddedildi", {
     targetType: "Listing",
@@ -183,14 +190,16 @@ export async function setUserRoleAction(id: string, role: string) {
 export async function adminDeleteUserAction(id: string) {
   const me = await ensureAdmin();
   if (id === me) throw new Error("Kendinizi silemezsiniz.");
-  await prisma.user.update({
-    where: { id },
-    data: { deletedAt: new Date(), isBanned: true },
-  });
-  await prisma.listing.updateMany({
-    where: { authorId: id },
-    data: { deletedAt: new Date(), status: "ARCHIVED" },
-  });
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date(), isBanned: true },
+    }),
+    prisma.listing.updateMany({
+      where: { authorId: id },
+      data: { deletedAt: new Date(), status: "ARCHIVED" },
+    }),
+  ]);
   await logAudit(me, "Üye silindi", { targetType: "User", targetId: id });
   revalidatePath("/admin/uyeler");
 }

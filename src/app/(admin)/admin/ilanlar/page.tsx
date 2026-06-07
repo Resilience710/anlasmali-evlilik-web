@@ -6,41 +6,48 @@ import {
   AdminListingsBulk,
   type AdminListingRow,
 } from "@/components/admin/listings-bulk";
+import { Pagination } from "@/components/ui/pagination";
 import {
   LISTING_STATUSES,
   LISTING_STATUS_LABELS,
   type ListingStatus,
 } from "@/lib/constants";
-import { cn, timeAgo } from "@/lib/utils";
+import { cn, clamp, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "İlanlar — Yönetim" };
 
 // Onay sistemi kapalı olduğundan Onay Bekliyor/Reddedildi filtreleri gösterilmiyor.
 const VISIBLE_STATUSES: ListingStatus[] = ["APPROVED", "ARCHIVED"];
+const PER_PAGE = 50;
 
 export default async function AdminListingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const status = sp.status as ListingStatus | undefined;
+  const page = clamp(parseInt(sp.page ?? "1", 10) || 1, 1, 100000);
 
   const where: Prisma.ListingWhereInput = {
     deletedAt: null,
     ...(status && LISTING_STATUSES.includes(status) ? { status } : {}),
   };
 
-  const listings = await prisma.listing.findMany({
-    where,
-    orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-    take: 100,
-    include: {
-      category: true,
-      city: true,
-      author: { select: { profile: { select: { displayName: true } } } },
-    },
-  });
+  const [listings, total] = await Promise.all([
+    prisma.listing.findMany({
+      where,
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+      include: {
+        category: true,
+        city: true,
+        author: { select: { profile: { select: { displayName: true } } } },
+      },
+    }),
+    prisma.listing.count({ where }),
+  ]);
 
   const rows: AdminListingRow[] = listings.map((l) => ({
     id: l.id,
@@ -82,6 +89,12 @@ export default async function AdminListingsPage({
       </div>
 
       <AdminListingsBulk rows={rows} />
+
+      <Pagination
+        page={page}
+        totalPages={Math.max(1, Math.ceil(total / PER_PAGE))}
+        baseQuery={{ status: sp.status }}
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { after } from "next/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Cake, MapPin, Clock, Eye, User2, Search } from "lucide-react";
@@ -49,14 +50,18 @@ export default async function ListingDetailPage({
     notFound();
   }
 
-  // Görüntülenme sayısı (sahibi dışında)
+  // Görüntülenme sayısı (sahibi dışında) — render'ı bloklamadan, yanıt
+  // gönderildikten sonra yazılır (render içinde yan etki yapılmaz).
   if (!isOwner) {
-    await prisma.listing
-      .update({
-        where: { id: listing.id },
-        data: { viewCount: { increment: 1 } },
-      })
-      .catch(() => {});
+    const listingId = listing.id;
+    after(async () => {
+      await prisma.listing
+        .update({
+          where: { id: listingId },
+          data: { viewCount: { increment: 1 } },
+        })
+        .catch(() => {});
+    });
   }
 
   let isFavorited = false;

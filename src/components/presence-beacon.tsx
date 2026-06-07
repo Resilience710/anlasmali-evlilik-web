@@ -14,7 +14,10 @@ export function PresenceBeacon() {
       );
     };
     ping();
-    const interval = setInterval(ping, 60_000);
+    // Yalnız sekme görünürken sinyal gönder (arka plan sekmeleri yük oluşturmasın)
+    const interval = setInterval(() => {
+      if (!document.hidden) ping();
+    }, 60_000);
     const onVisible = () => {
       if (document.visibilityState === "visible") ping();
     };

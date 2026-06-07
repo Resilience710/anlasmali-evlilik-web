@@ -10,8 +10,9 @@ export async function getClientIp(): Promise<string> {
 }
 
 /**
- * DB tabanlı basit rate limit (sunucusuz uyumlu).
- * Pencere dolmuşsa sıfırlar, değilse sayacı artırır.
+ * DB tabanlı rate limit (sunucusuz uyumlu) — TEK ATOMİK SQL ifadesi.
+ * Eşzamanlı isteklerde yarış koşulu yoktur (INSERT ... ON CONFLICT increment).
+ * Pencere dolmuşsa sayaç sıfırlanır; içindeyse artar.
  * DB hatasında fail-open (meşru kullanıcıyı kilitlememek için).
  */
 export async function checkRateLimit(
@@ -22,21 +23,18 @@ export async function checkRateLimit(
   const now = new Date();
   const expiresAt = new Date(now.getTime() + windowSec * 1000);
   try {
-    const existing = await prisma.rateLimit.findUnique({ where: { key } });
-    if (!existing || existing.expiresAt < now) {
-      await prisma.rateLimit.upsert({
-        where: { key },
-        update: { count: 1, expiresAt },
-        create: { key, count: 1, expiresAt },
-      });
-      return { ok: true };
-    }
-    if (existing.count >= limit) return { ok: false };
-    await prisma.rateLimit.update({
-      where: { key },
-      data: { count: { increment: 1 } },
-    });
-    return { ok: true };
+    const rows = await prisma.$queryRaw<{ count: number }[]>`
+      INSERT INTO "RateLimit" ("key", "count", "expiresAt")
+      VALUES (${key}, 1, ${expiresAt})
+      ON CONFLICT ("key") DO UPDATE SET
+        "count" = CASE WHEN "RateLimit"."expiresAt" < ${now}
+                       THEN 1 ELSE "RateLimit"."count" + 1 END,
+        "expiresAt" = CASE WHEN "RateLimit"."expiresAt" < ${now}
+                           THEN ${expiresAt} ELSE "RateLimit"."expiresAt" END
+      RETURNING "count"
+    `;
+    const count = Number(rows[0]?.count ?? 1);
+    return { ok: count <= limit };
   } catch {
     return { ok: true };
   }

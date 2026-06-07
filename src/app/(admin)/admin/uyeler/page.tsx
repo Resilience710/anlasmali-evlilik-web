@@ -1,45 +1,56 @@
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminUsersTable, type AdminUserRow } from "@/components/admin/users-table";
-import { timeAgo } from "@/lib/utils";
+import { Pagination } from "@/components/ui/pagination";
+import { clamp, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Üyeler — Yönetim" };
+
+const PER_PAGE = 50;
 
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   const sp = await searchParams;
   const session = await auth();
   const meId = session?.user?.id;
   const viewerRole = session?.user?.role;
+  const page = clamp(parseInt(sp.page ?? "1", 10) || 1, 1, 100000);
 
-  const users = await prisma.user.findMany({
-    where: {
-      deletedAt: null,
-      ...(sp.q
-        ? {
-            OR: [
-              { email: { contains: sp.q } },
-              { profile: { displayName: { contains: sp.q } } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    select: {
-      id: true,
-      email: true,
-      role: true,
-      isBanned: true,
-      createdAt: true,
-      profile: { select: { displayName: true } },
-      _count: { select: { listings: true } },
-    },
-  });
+  const where: Prisma.UserWhereInput = {
+    deletedAt: null,
+    ...(sp.q
+      ? {
+          OR: [
+            { email: { contains: sp.q } },
+            { profile: { displayName: { contains: sp.q } } },
+          ],
+        }
+      : {}),
+  };
+
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        isBanned: true,
+        createdAt: true,
+        profile: { select: { displayName: true } },
+        _count: { select: { listings: true } },
+      },
+    }),
+    prisma.user.count({ where }),
+  ]);
 
   const rows: AdminUserRow[] = users.map((u) => ({
     id: u.id,
@@ -69,6 +80,12 @@ export default async function AdminUsersPage({
       </div>
 
       <AdminUsersTable rows={rows} meId={meId} viewerRole={viewerRole} />
+
+      <Pagination
+        page={page}
+        totalPages={Math.max(1, Math.ceil(total / PER_PAGE))}
+        baseQuery={{ q: sp.q }}
+      />
     </div>
   );
 }

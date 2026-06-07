@@ -16,122 +16,39 @@ export type MessageActionState = { error?: string };
 const MSG_TOO_FAST =
   "Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyip tekrar deneyin.";
 
-async function requireCompleteProfile(userId: string) {
-  const profile = await prisma.profile.findUnique({ where: { userId } });
-  if (getMissingProfileFields(profile).length > 0) {
-    redirect("/hesabim/profil?eksik=1");
-  }
-}
-
-export async function sendMessageAction(
-  _prev: MessageActionState,
-  formData: FormData
-): Promise<MessageActionState> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/giris");
-  }
-
-  // Yasaklı kullanıcı mesaj gönderemez
-  if (await isUserBanned(session.user.id)) redirect("/hesap-askida");
-
-  // Mesaj göndermeden önce profil eksiksiz olmalı
-  await requireCompleteProfile(session.user.id);
-
-  if (!(await checkRateLimit(`msg:${session.user.id}`, 60, 60)).ok) {
-    return { error: MSG_TOO_FAST };
-  }
-
-  const parsed = messageSchema.safeParse({
-    recipientId: formData.get("recipientId"),
-    body: formData.get("body"),
-  });
-  if (!parsed.success) {
-    return { error: "Mesaj gönderilemedi. Geçerli bir mesaj yazın." };
-  }
-
-  const me = session.user.id;
-  const { recipientId, body } = parsed.data;
-
-  if (recipientId === me) {
-    return { error: "Kendinize mesaj gönderemezsiniz." };
-  }
-
-  if (await findBannedWord(body)) {
-    return { error: BANNED_CONTENT_MESSAGE };
-  }
-
-  const recipient = await prisma.user.findUnique({
-    where: { id: recipientId },
-    select: { id: true, isBanned: true, deletedAt: true },
-  });
-  if (!recipient || recipient.isBanned || recipient.deletedAt) {
-    return { error: "Alıcı bulunamadı." };
-  }
-
-  const conv = await getOrCreateConversation(me, recipientId);
-
-  await prisma.$transaction([
-    prisma.message.create({
-      data: { conversationId: conv.id, senderId: me, body },
-    }),
-    prisma.conversation.update({
-      where: { id: conv.id },
-      data: { lastMessageAt: new Date() },
-    }),
-    prisma.notification.create({
-      data: {
-        userId: recipientId,
-        type: "MESSAGE",
-        title: "Yeni mesajınız var",
-        body: body.length > 60 ? body.slice(0, 60) + "…" : body,
-        linkUrl: `/hesabim/mesajlar/${conv.id}`,
-      },
-    }),
-  ]);
-
-  revalidatePath(`/hesabim/mesajlar/${conv.id}`);
-  revalidatePath("/hesabim/mesajlar");
-  redirect(`/hesabim/mesajlar/${conv.id}`);
-}
-
-/** Konuşma içinden mesaj gönderir (thread sayfasında kalır). */
-export async function replyAction(
-  conversationId: string,
-  _prev: MessageActionState,
-  formData: FormData
-): Promise<MessageActionState> {
+/**
+ * Mesaj göndermeden önceki ortak ön koşullar:
+ * giriş + yasak + profil tamamlama + rate limit. (Her iki gönderme akışında ortak.)
+ * Hata yoksa { me } döndürür; aksi halde redirect eder ya da { error } verir.
+ */
+async function prepareSend(): Promise<{ me: string } | { error: string }> {
   const session = await auth();
   if (!session?.user?.id) redirect("/giris");
   const me = session.user.id;
 
-  // Yasaklı kullanıcı mesaj gönderemez
   if (await isUserBanned(me)) redirect("/hesap-askida");
 
-  // Mesaj göndermeden önce profil eksiksiz olmalı
-  await requireCompleteProfile(me);
+  const profile = await prisma.profile.findUnique({ where: { userId: me } });
+  if (getMissingProfileFields(profile).length > 0) {
+    redirect("/hesabim/profil?eksik=1");
+  }
 
   if (!(await checkRateLimit(`msg:${me}`, 60, 60)).ok) {
     return { error: MSG_TOO_FAST };
   }
+  return { me };
+}
 
-  const body = String(formData.get("body") ?? "").trim();
-  if (!body) return { error: "Mesaj boş olamaz." };
-  if (body.length > 2000) return { error: "Mesaj çok uzun." };
-  if (await findBannedWord(body)) return { error: BANNED_CONTENT_MESSAGE };
-
-  const conv = await prisma.conversation.findUnique({
-    where: { id: conversationId },
-    select: { id: true, userAId: true, userBId: true },
-  });
-  if (!conv || (conv.userAId !== me && conv.userBId !== me)) {
-    return { error: "Yetkisiz işlem." };
-  }
-  const recipientId = conv.userAId === me ? conv.userBId : conv.userAId;
-
+/** Mesajı + konuşma güncellemesini + bildirimi tek transaction'da kaydeder. */
+async function persistMessage(
+  conversationId: string,
+  senderId: string,
+  recipientId: string,
+  body: string
+) {
   await prisma.$transaction([
     prisma.message.create({
-      data: { conversationId, senderId: me, body },
+      data: { conversationId, senderId, body },
     }),
     prisma.conversation.update({
       where: { id: conversationId },
@@ -147,6 +64,74 @@ export async function replyAction(
       },
     }),
   ]);
+}
+
+export async function sendMessageAction(
+  _prev: MessageActionState,
+  formData: FormData
+): Promise<MessageActionState> {
+  const prep = await prepareSend();
+  if ("error" in prep) return { error: prep.error };
+  const me = prep.me;
+
+  const parsed = messageSchema.safeParse({
+    recipientId: formData.get("recipientId"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) {
+    return { error: "Mesaj gönderilemedi. Geçerli bir mesaj yazın." };
+  }
+
+  const { recipientId, body } = parsed.data;
+
+  if (recipientId === me) {
+    return { error: "Kendinize mesaj gönderemezsiniz." };
+  }
+  if (await findBannedWord(body)) {
+    return { error: BANNED_CONTENT_MESSAGE };
+  }
+
+  const recipient = await prisma.user.findUnique({
+    where: { id: recipientId },
+    select: { id: true, isBanned: true, deletedAt: true },
+  });
+  if (!recipient || recipient.isBanned || recipient.deletedAt) {
+    return { error: "Alıcı bulunamadı." };
+  }
+
+  const conv = await getOrCreateConversation(me, recipientId);
+  await persistMessage(conv.id, me, recipientId, body);
+
+  revalidatePath(`/hesabim/mesajlar/${conv.id}`);
+  revalidatePath("/hesabim/mesajlar");
+  redirect(`/hesabim/mesajlar/${conv.id}`);
+}
+
+/** Konuşma içinden mesaj gönderir (thread sayfasında kalır). */
+export async function replyAction(
+  conversationId: string,
+  _prev: MessageActionState,
+  formData: FormData
+): Promise<MessageActionState> {
+  const prep = await prepareSend();
+  if ("error" in prep) return { error: prep.error };
+  const me = prep.me;
+
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) return { error: "Mesaj boş olamaz." };
+  if (body.length > 2000) return { error: "Mesaj çok uzun." };
+  if (await findBannedWord(body)) return { error: BANNED_CONTENT_MESSAGE };
+
+  const conv = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+    select: { id: true, userAId: true, userBId: true },
+  });
+  if (!conv || (conv.userAId !== me && conv.userBId !== me)) {
+    return { error: "Yetkisiz işlem." };
+  }
+  const recipientId = conv.userAId === me ? conv.userBId : conv.userAId;
+
+  await persistMessage(conversationId, me, recipientId, body);
 
   revalidatePath(`/hesabim/mesajlar/${conversationId}`);
   return {};

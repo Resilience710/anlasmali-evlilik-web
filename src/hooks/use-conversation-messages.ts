@@ -72,10 +72,15 @@ export function useConversationMessages(
           };
         })
         .catch(() => {});
-      // Realtime'a ek olarak yavaş bir yedek polling
-      interval = setInterval(refetch, 15000);
+      // Realtime'a ek olarak yavaş bir yedek polling (sekme gizliyken durur)
+      interval = setInterval(() => {
+        if (!document.hidden) refetch();
+      }, 15000);
     } else {
-      interval = setInterval(refetch, MESSAGE_POLL_INTERVAL_MS);
+      // Sekme arka plandayken gereksiz istek atma (sunucu yükü düşer)
+      interval = setInterval(() => {
+        if (!document.hidden) refetch();
+      }, MESSAGE_POLL_INTERVAL_MS);
     }
 
     return () => {

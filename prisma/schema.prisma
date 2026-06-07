@@ -1,7 +1,7 @@
 // Anlaşmalı Evlilik - Prisma şeması
-// NOT: Şema kasıtlı olarak DB-bağımsız tutuldu (enum/native tip yok) ->
-// yerel geliştirmede SQLite, üretimde Supabase Postgres ile aynı şema çalışır.
-// Üretim için: provider = "postgresql" yapın ve DATABASE_URL'i Supabase'e çevirin.
+// Veritabanı: PostgreSQL (Neon). Hem yerel hem üretim aynı Neon'u kullanır.
+// Bazı sorgular Postgres'e özgü ham SQL kullanır (conversations.ts, stats.ts).
+// String tabanlı "enum benzeri" alanlar (role/status vb.) bilinçli tercihtir.
 
 generator client {
   provider = "prisma-client-js"
