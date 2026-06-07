@@ -2,7 +2,7 @@ import Link from "next/link";
 import { HeartHandshake } from "lucide-react";
 
 export function Logo({
-  siteName = "anlaşmalievlilik.com",
+  siteName = "anlaşmalievlilik.net",
   tagline = "Ciddi İlişki, Mutlu Evlilik",
   logoUrl,
   compact = false,

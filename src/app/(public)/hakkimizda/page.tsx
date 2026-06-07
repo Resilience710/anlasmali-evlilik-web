@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Hakkımızda - Güvenilir Ciddi Evlilik Platformu",
   description:
-    "AnlaşmalıEvlilik.com ciddi ilişki ve evlilik düşünen yetişkin üyeleri güvenli, gizlilik odaklı ve moderasyonlu bir ortamda buluşturur.",
+    "AnlaşmalıEvlilik.net ciddi ilişki ve evlilik düşünen yetişkin üyeleri güvenli, gizlilik odaklı ve moderasyonlu bir ortamda buluşturur.",
   path: "/hakkimizda",
   keywords: ["güvenilir evlilik platformu", "ciddi ilişki sitesi hakkında"],
 });

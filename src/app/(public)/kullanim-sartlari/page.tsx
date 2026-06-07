@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Kullanım Şartları",
   description:
-    "AnlaşmalıEvlilik.com üyelik, ilan, profil, mesajlaşma ve güvenli kullanım koşulları.",
+    "AnlaşmalıEvlilik.net üyelik, ilan, profil, mesajlaşma ve güvenli kullanım koşulları.",
   path: "/kullanim-sartlari",
   keywords: ["evlilik sitesi kullanım şartları", "üyelik koşulları", "ilan kuralları"],
 });
@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
 export default async function TermsPage() {
   const s = await getSiteSettings();
   const siteName = s.siteName;
-  const email = s.contactEmail || "iletisim@anlasmalievlilik.com";
+  const email = s.contactEmail || "iletisim@anlasmalievlilik.net";
 
   // Admin panelinden özel (uzun) metin girildiyse onu göster
   const custom = s.termsText && s.termsText.trim().length > 200;

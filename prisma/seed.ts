@@ -40,14 +40,14 @@ async function main() {
     create: {
       id: "singleton",
       contactText: CONTACT_TEXT,
-      siteName: "anlaşmalievlilik.com",
+      siteName: "anlaşmalievlilik.net",
       tagline: "Ciddi İlişki, Mutlu Evlilik",
-      heroTitle: "Hayat Arkadaşınızı AnlaşmalıEvlilik.com'da Bulun",
+      heroTitle: "Hayat Arkadaşınızı AnlaşmalıEvlilik.net'te Bulun",
       heroSubtitle:
         "Ciddi düşünen, geleceğe birlikte yürümek isteyen insanları bir araya getiriyoruz.",
       aboutText:
-        "AnlaşmalıEvlilik.com, ciddi ilişki ve evlilik düşünen bireyleri güvenli bir ortamda buluşturmak için kurulmuştur. Gizliliğinize önem veriyor, gerçek ve doğrulanmış üyelerle tanışmanızı sağlıyoruz.",
-      contactEmail: "iletisim@anlasmalievlilik.com",
+        "AnlaşmalıEvlilik.net, ciddi ilişki ve evlilik düşünen bireyleri güvenli bir ortamda buluşturmak için kurulmuştur. Gizliliğinize önem veriyor, gerçek ve doğrulanmış üyelerle tanışmanızı sağlıyoruz.",
+      contactEmail: "iletisim@anlasmalievlilik.net",
       contactPhone: "+90 212 000 00 00",
       happyCount: 2893,
       termsText:

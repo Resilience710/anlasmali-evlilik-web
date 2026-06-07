@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "Üyelik İşlemleri",
-  description: "AnlaşmalıEvlilik.com üyelik ve giriş işlemleri.",
+  description: "AnlaşmalıEvlilik.net üyelik ve giriş işlemleri.",
   path: "/giris",
   noIndex: true,
 });

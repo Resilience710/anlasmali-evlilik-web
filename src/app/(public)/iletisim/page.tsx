@@ -5,9 +5,9 @@ import { ContactForm } from "@/components/contact-form";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "İletişim - AnlaşmalıEvlilik.com",
+  title: "İletişim - AnlaşmalıEvlilik.net",
   description:
-    "AnlaşmalıEvlilik.com üyelik, ilan, şikayet, güvenlik ve iş birliği talepleri için iletişim sayfası.",
+    "AnlaşmalıEvlilik.net üyelik, ilan, şikayet, güvenlik ve iş birliği talepleri için iletişim sayfası.",
   path: "/iletisim",
   keywords: ["evlilik sitesi iletişim", "üyelik destek", "ilan şikayet"],
 });

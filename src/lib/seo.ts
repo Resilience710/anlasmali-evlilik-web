@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  process.env.NEXTAUTH_URL?.trim() ||
-  "https://www.anlasmalievlilik.com";
+  "https://anlasmalievlilik.net";
 
-export const SITE_NAME = "anlaşmalievlilik.com";
+export const SITE_NAME = "anlaşmalievlilik.net";
 
 export const DEFAULT_SEO_TITLE =
   "Anlaşmalı Evlilik ve Ciddi Evlilik Sitesi";

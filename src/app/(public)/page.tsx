@@ -157,7 +157,7 @@ export default async function HomePage() {
               Ciddi evlilik ve anlaşmalı evlilik ilanları
             </h2>
             <p className="mt-3 leading-relaxed text-muted-foreground">
-              AnlaşmalıEvlilik.com, evlilik niyetiyle tanışmak isteyen yetişkin
+              AnlaşmalıEvlilik.net, evlilik niyetiyle tanışmak isteyen yetişkin
               üyeleri şehir, yaş, cinsiyet ve ilan kategorilerine göre bir araya
               getirir. Amaç; geçici sohbetlerden çok, beklentisini açıkça yazan
               kişilerle güvenli ve saygılı bir tanışma alanı oluşturmaktır.

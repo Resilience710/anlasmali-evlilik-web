@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Gizlilik Politikası ve KVKK",
   description:
-    "AnlaşmalıEvlilik.com kişisel veri işleme, KVKK, çerez, üyelik, profil, ilan ve mesajlaşma gizliliği politikası.",
+    "AnlaşmalıEvlilik.net kişisel veri işleme, KVKK, çerez, üyelik, profil, ilan ve mesajlaşma gizliliği politikası.",
   path: "/gizlilik-politikasi",
   keywords: ["KVKK evlilik sitesi", "gizlilik politikası", "kişisel veri güvenliği"],
 });
@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
 export default async function PrivacyPage() {
   const s = await getSiteSettings();
   const siteName = s.siteName;
-  const email = s.contactEmail || "iletisim@anlasmalievlilik.com";
+  const email = s.contactEmail || "iletisim@anlasmalievlilik.net";
   const custom = s.privacyText && s.privacyText.trim().length > 200;
 
   return (

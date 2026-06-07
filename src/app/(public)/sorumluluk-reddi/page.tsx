@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Sorumluluk Reddi ve Güvenli Kullanım",
   description:
-    "AnlaşmalıEvlilik.com ilan, profil, mesajlaşma, kullanıcı içeriği ve güvenli tanışma sorumluluk reddi.",
+    "AnlaşmalıEvlilik.net ilan, profil, mesajlaşma, kullanıcı içeriği ve güvenli tanışma sorumluluk reddi.",
   path: "/sorumluluk-reddi",
   keywords: ["evlilik sitesi sorumluluk reddi", "güvenli tanışma", "ilan sorumluluğu"],
 });
@@ -14,7 +14,7 @@ export const metadata: Metadata = pageMetadata({
 export default async function DisclaimerPage() {
   const s = await getSiteSettings();
   const site = s.siteName;
-  const email = s.contactEmail || "iletisim@anlasmalievlilik.com";
+  const email = s.contactEmail || "iletisim@anlasmalievlilik.net";
   // Admin panelinden özel metin girildiyse onu göster, yoksa hazır metin.
   const custom = s.disclaimerText && s.disclaimerText.trim().length > 100;
 

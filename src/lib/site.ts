@@ -11,9 +11,9 @@ export type SocialLinks = {
 export type FaqItem = { q: string; a: string };
 
 const DEFAULTS = {
-  siteName: "anlaşmalievlilik.com",
+  siteName: "anlaşmalievlilik.net",
   tagline: "Ciddi İlişki, Mutlu Evlilik",
-  heroTitle: "Hayat Arkadaşınızı AnlaşmalıEvlilik.com'da Bulun",
+  heroTitle: "Hayat Arkadaşınızı AnlaşmalıEvlilik.net'te Bulun",
   heroSubtitle:
     "Ciddi düşünen, geleceğe birlikte yürümek isteyen insanları bir araya getiriyoruz.",
 };
