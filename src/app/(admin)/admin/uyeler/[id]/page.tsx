@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AdminUserActions } from "@/components/admin/user-actions";
-import { GENDER_LABELS, type Gender, LISTING_STATUS_LABELS, type ListingStatus } from "@/lib/constants";
+import { GENDER_LABELS, type Gender, LISTING_STATUS_LABELS, type ListingStatus, ROLE_LABELS, type Role } from "@/lib/constants";
 import { initials, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Üye Detayı — Yönetim" };
@@ -49,8 +49,8 @@ export default async function AdminUserDetail({
               <h1 className="text-xl font-bold">{name}</h1>
               <p className="text-sm text-muted-foreground">{user.email}</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Badge variant={user.role === "ADMIN" ? "default" : "neutral"}>
-                  {user.role === "ADMIN" ? "Admin" : "Üye"}
+                <Badge variant={user.role === "USER" ? "neutral" : "default"}>
+                  {ROLE_LABELS[user.role as Role] ?? user.role}
                 </Badge>
                 {user.isBanned && <Badge variant="destructive">Yasaklı</Badge>}
                 {user.profile?.gender && (
@@ -66,6 +66,7 @@ export default async function AdminUserDetail({
             isBanned={user.isBanned}
             role={user.role}
             isSelf={user.id === session?.user?.id}
+            viewerRole={session?.user?.role}
           />
         </div>
 

@@ -20,6 +20,16 @@ async function ensureAdmin() {
   return session.user.id;
 }
 
+/** Moderasyon yetkisi: ADMIN veya MODERATOR. */
+async function ensureStaff() {
+  const session = await auth();
+  const role = session?.user?.role;
+  if (!session?.user?.id || (role !== "ADMIN" && role !== "MODERATOR")) {
+    throw new Error("Yetkisiz işlem.");
+  }
+  return session.user.id;
+}
+
 export type AdminState = {
   error?: string;
   fieldErrors?: Record<string, string[]>;
@@ -28,7 +38,7 @@ export type AdminState = {
 
 // ---------- İlanlar ----------
 export async function approveListingAction(id: string) {
-  const adminId = await ensureAdmin();
+  const adminId = await ensureStaff();
   const listing = await prisma.listing.update({
     where: { id },
     data: { status: "APPROVED", publishedAt: new Date(), rejectReason: null },
@@ -54,7 +64,7 @@ export async function approveListingAction(id: string) {
 }
 
 export async function rejectListingAction(id: string, formData: FormData) {
-  const adminId = await ensureAdmin();
+  const adminId = await ensureStaff();
   const reason = String(formData.get("reason") ?? "").slice(0, 300);
   const listing = await prisma.listing.update({
     where: { id },
@@ -79,7 +89,7 @@ export async function rejectListingAction(id: string, formData: FormData) {
 }
 
 export async function adminDeleteListingAction(id: string) {
-  const adminId = await ensureAdmin();
+  const adminId = await ensureStaff();
   await prisma.listing.update({
     where: { id },
     data: { deletedAt: new Date(), status: "ARCHIVED" },
@@ -94,7 +104,7 @@ export async function updateListingAdminAction(
   _prev: AdminState,
   formData: FormData
 ): Promise<AdminState> {
-  await ensureAdmin();
+  await ensureStaff();
   const { listingSchema } = await import("@/lib/validations");
   const parsed = listingSchema.safeParse({
     title: formData.get("title"),
@@ -127,12 +137,31 @@ export async function updateListingAdminAction(
 }
 
 // ---------- Üyeler ----------
-export async function setUserBanAction(id: string, banned: boolean) {
-  const adminId = await ensureAdmin();
-  await prisma.user.update({ where: { id }, data: { isBanned: banned } });
+export async function setUserBanAction(
+  id: string,
+  banned: boolean,
+  reason?: string,
+  durationDays?: number
+) {
+  const adminId = await ensureStaff();
+  const banExpiresAt =
+    banned && durationDays && durationDays > 0
+      ? new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000)
+      : null;
+  await prisma.user.update({
+    where: { id },
+    data: banned
+      ? { isBanned: true, banReason: reason?.slice(0, 300) || null, banExpiresAt }
+      : { isBanned: false, banReason: null, banExpiresAt: null },
+  });
   await logAudit(adminId, banned ? "Üye yasaklandı" : "Üye yasağı kaldırıldı", {
     targetType: "User",
     targetId: id,
+    detail: banned
+      ? [reason, durationDays ? `${durationDays} gün` : "kalıcı"]
+          .filter(Boolean)
+          .join(" · ")
+      : undefined,
   });
   revalidatePath("/admin/uyeler");
   revalidatePath(`/admin/uyeler/${id}`);
@@ -140,7 +169,7 @@ export async function setUserBanAction(id: string, banned: boolean) {
 
 export async function setUserRoleAction(id: string, role: string) {
   const adminId = await ensureAdmin();
-  if (role !== "USER" && role !== "ADMIN") return;
+  if (!["USER", "MODERATOR", "ADMIN"].includes(role)) return;
   await prisma.user.update({ where: { id }, data: { role } });
   await logAudit(adminId, "Üye rolü değiştirildi", {
     targetType: "User",
@@ -269,7 +298,7 @@ export async function deleteAgeOptionAction(id: string) {
 
 // ---------- Şikayetler ----------
 export async function resolveReportAction(id: string, status: string) {
-  const me = await ensureAdmin();
+  const me = await ensureStaff();
   if (!["OPEN", "REVIEWING", "RESOLVED", "DISMISSED"].includes(status)) return;
   await prisma.report.update({
     where: { id },
@@ -285,7 +314,7 @@ export async function resolveReportAction(id: string, status: string) {
 
 // ---------- Mesajlar ----------
 export async function adminDeleteMessageAction(id: string) {
-  const adminId = await ensureAdmin();
+  const adminId = await ensureStaff();
   await prisma.message.update({
     where: { id },
     data: { deletedAt: new Date() },
@@ -367,4 +396,99 @@ export async function updateSiteSettingsAction(
   });
   revalidatePath("/", "layout");
   return { success: "Site ayarları güncellendi." };
+}
+
+// ---------- Toplu işlemler (#12) ----------
+export async function bulkSetUserBanAction(ids: string[], banned: boolean) {
+  const me = await ensureStaff();
+  const targets = ids.filter((id) => id !== me);
+  if (targets.length === 0) return;
+  await prisma.user.updateMany({
+    where: { id: { in: targets } },
+    data: banned
+      ? { isBanned: true }
+      : { isBanned: false, banReason: null, banExpiresAt: null },
+  });
+  await logAudit(me, banned ? "Toplu üye yasaklandı" : "Toplu yasak kaldırıldı", {
+    targetType: "User",
+    detail: `${targets.length} üye`,
+  });
+  revalidatePath("/admin/uyeler");
+}
+
+export async function bulkDeleteUsersAction(ids: string[]) {
+  const me = await ensureAdmin();
+  const targets = ids.filter((id) => id !== me);
+  if (targets.length === 0) return;
+  await prisma.user.updateMany({
+    where: { id: { in: targets } },
+    data: { deletedAt: new Date(), isBanned: true },
+  });
+  await prisma.listing.updateMany({
+    where: { authorId: { in: targets } },
+    data: { deletedAt: new Date(), status: "ARCHIVED" },
+  });
+  await logAudit(me, "Toplu üye silindi", {
+    targetType: "User",
+    detail: `${targets.length} üye`,
+  });
+  revalidatePath("/admin/uyeler");
+}
+
+export async function bulkApproveListingsAction(ids: string[]) {
+  const me = await ensureStaff();
+  if (ids.length === 0) return;
+  await prisma.listing.updateMany({
+    where: { id: { in: ids } },
+    data: { status: "APPROVED", publishedAt: new Date(), rejectReason: null },
+  });
+  await logAudit(me, "Toplu ilan onaylandı", {
+    targetType: "Listing",
+    detail: `${ids.length} ilan`,
+  });
+  revalidatePath("/admin/ilanlar");
+  revalidatePath("/ilanlar");
+  revalidatePath("/");
+}
+
+export async function bulkDeleteListingsAction(ids: string[]) {
+  const me = await ensureStaff();
+  if (ids.length === 0) return;
+  await prisma.listing.updateMany({
+    where: { id: { in: ids } },
+    data: { deletedAt: new Date(), status: "ARCHIVED" },
+  });
+  await logAudit(me, "Toplu ilan silindi", {
+    targetType: "Listing",
+    detail: `${ids.length} ilan`,
+  });
+  revalidatePath("/admin/ilanlar");
+  revalidatePath("/ilanlar");
+}
+
+// ---------- Yasaklı kelimeler (#1) ----------
+export async function addBannedWordAction(formData: FormData): Promise<void> {
+  const me = await ensureAdmin();
+  const word = String(formData.get("word") ?? "")
+    .trim()
+    .toLocaleLowerCase("tr-TR");
+  if (word.length < 2 || word.length > 60) return;
+  await prisma.bannedWord
+    .create({ data: { word } })
+    .catch(() => {}); // zaten varsa yoksay
+  await logAudit(me, "Yasaklı kelime eklendi", {
+    targetType: "BannedWord",
+    detail: word,
+  });
+  revalidatePath("/admin/yasakli-kelimeler");
+}
+
+export async function deleteBannedWordAction(id: string) {
+  const me = await ensureAdmin();
+  await prisma.bannedWord.delete({ where: { id } }).catch(() => {});
+  await logAudit(me, "Yasaklı kelime silindi", {
+    targetType: "BannedWord",
+    targetId: id,
+  });
+  revalidatePath("/admin/yasakli-kelimeler");
 }

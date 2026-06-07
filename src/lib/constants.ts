@@ -1,7 +1,13 @@
 // Şemada string olarak tutulan "enum benzeri" alanların sabitleri + Türkçe etiketleri.
 
-export const ROLES = ["USER", "ADMIN"] as const;
+export const ROLES = ["USER", "MODERATOR", "ADMIN"] as const;
 export type Role = (typeof ROLES)[number];
+
+export const ROLE_LABELS: Record<Role, string> = {
+  USER: "Üye",
+  MODERATOR: "Moderatör",
+  ADMIN: "Admin",
+};
 
 export const GENDERS = ["MALE", "FEMALE"] as const;
 export type Gender = (typeof GENDERS)[number];

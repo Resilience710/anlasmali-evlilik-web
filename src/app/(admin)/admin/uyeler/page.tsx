@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { Badge } from "@/components/ui/badge";
-import { AdminUserActions } from "@/components/admin/user-actions";
+import { AdminUsersTable, type AdminUserRow } from "@/components/admin/users-table";
 import { timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Üyeler — Yönetim" };
@@ -16,6 +14,7 @@ export default async function AdminUsersPage({
   const sp = await searchParams;
   const session = await auth();
   const meId = session?.user?.id;
+  const viewerRole = session?.user?.role;
 
   const users = await prisma.user.findMany({
     where: {
@@ -42,6 +41,16 @@ export default async function AdminUsersPage({
     },
   });
 
+  const rows: AdminUserRow[] = users.map((u) => ({
+    id: u.id,
+    displayName: u.profile?.displayName ?? "—",
+    email: u.email,
+    role: u.role,
+    isBanned: u.isBanned,
+    listings: u._count.listings,
+    registered: timeAgo(u.createdAt),
+  }));
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -59,60 +68,7 @@ export default async function AdminUsersPage({
         </form>
       </div>
 
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-border">
-        <table className="w-full min-w-[760px] text-sm">
-          <thead className="bg-surface-2 text-left text-xs uppercase text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3">Üye</th>
-              <th className="px-4 py-3">E-posta</th>
-              <th className="px-4 py-3">Rol</th>
-              <th className="px-4 py-3">Durum</th>
-              <th className="px-4 py-3">İlan</th>
-              <th className="px-4 py-3">Kayıt</th>
-              <th className="px-4 py-3">İşlemler</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {users.map((u) => (
-              <tr key={u.id} className="bg-surface hover:bg-surface-2/50">
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/uyeler/${u.id}`}
-                    className="font-medium hover:text-primary"
-                  >
-                    {u.profile?.displayName ?? "—"}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={u.role === "ADMIN" ? "default" : "neutral"}>
-                    {u.role === "ADMIN" ? "Admin" : "Üye"}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  {u.isBanned ? (
-                    <Badge variant="destructive">Yasaklı</Badge>
-                  ) : (
-                    <Badge variant="success">Aktif</Badge>
-                  )}
-                </td>
-                <td className="px-4 py-3">{u._count.listings}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {timeAgo(u.createdAt)}
-                </td>
-                <td className="px-4 py-3">
-                  <AdminUserActions
-                    id={u.id}
-                    isBanned={u.isBanned}
-                    role={u.role}
-                    isSelf={u.id === meId}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AdminUsersTable rows={rows} meId={meId} viewerRole={viewerRole} />
     </div>
   );
 }

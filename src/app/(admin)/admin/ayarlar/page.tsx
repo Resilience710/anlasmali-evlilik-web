@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/site";
+import { requireAdmin } from "@/lib/auth-guards";
 import { SettingsForm } from "@/components/admin/settings-form";
 
 export const metadata: Metadata = { title: "Site Ayarları — Yönetim" };
 
 export default async function AdminSettingsPage() {
+  await requireAdmin();
   const s = await getSiteSettings();
 
   return (

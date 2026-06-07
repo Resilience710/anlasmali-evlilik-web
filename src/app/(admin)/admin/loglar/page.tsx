@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth-guards";
 import { timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Denetim Kayıtları — Yönetim" };
 
 export default async function AuditLogPage() {
+  await requireAdmin();
   const logs = await prisma.auditLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,

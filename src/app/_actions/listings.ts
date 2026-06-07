@@ -9,6 +9,7 @@ import { slugify, randomSuffix } from "@/lib/utils";
 import { LISTING_REQUIRES_APPROVAL } from "@/lib/constants";
 import { getMissingProfileFields } from "@/lib/profile-completeness";
 import { isUserBanned } from "@/lib/auth-guards";
+import { findBannedWord, BANNED_CONTENT_MESSAGE } from "@/lib/moderation";
 
 export type ListingActionState = {
   error?: string;
@@ -73,6 +74,12 @@ export async function createListingAction(
   }
 
   const d = parsed.data;
+
+  // Yasaklı kelime kontrolü (otomatik moderasyon)
+  if (await findBannedWord(`${d.title} ${d.description}`)) {
+    return { error: BANNED_CONTENT_MESSAGE, values: formValues(formData) };
+  }
+
   const slug = `${slugify(d.title)}-${randomSuffix()}`;
 
   await prisma.listing.create({
@@ -142,6 +149,11 @@ export async function updateListingAction(
     };
   }
   const d = parsed.data;
+
+  // Yasaklı kelime kontrolü (otomatik moderasyon)
+  if (await findBannedWord(`${d.title} ${d.description}`)) {
+    return { error: BANNED_CONTENT_MESSAGE, values: formValues(formData) };
+  }
 
   // Onay açıksa düzenlenen ilan yeniden onaya düşer; kapalıysa yayında kalır.
   await prisma.listing.update({

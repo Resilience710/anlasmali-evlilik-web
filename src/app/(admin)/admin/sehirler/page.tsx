@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CatalogDeleteButton } from "@/components/admin/simple-action-buttons";
+import { requireAdmin } from "@/lib/auth-guards";
 
 export const metadata: Metadata = { title: "Şehirler — Yönetim" };
 
 export default async function AdminCitiesPage() {
+  await requireAdmin();
   const cities = await prisma.city.findMany({ orderBy: { order: "asc" } });
 
   return (

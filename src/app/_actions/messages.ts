@@ -9,6 +9,7 @@ import { getOrCreateConversation, canonicalPair } from "@/lib/conversations";
 import { getMissingProfileFields } from "@/lib/profile-completeness";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isUserBanned } from "@/lib/auth-guards";
+import { findBannedWord, BANNED_CONTENT_MESSAGE } from "@/lib/moderation";
 
 export type MessageActionState = { error?: string };
 
@@ -54,6 +55,10 @@ export async function sendMessageAction(
 
   if (recipientId === me) {
     return { error: "Kendinize mesaj gönderemezsiniz." };
+  }
+
+  if (await findBannedWord(body)) {
+    return { error: BANNED_CONTENT_MESSAGE };
   }
 
   const recipient = await prisma.user.findUnique({
@@ -113,6 +118,7 @@ export async function replyAction(
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return { error: "Mesaj boş olamaz." };
   if (body.length > 2000) return { error: "Mesaj çok uzun." };
+  if (await findBannedWord(body)) return { error: BANNED_CONTENT_MESSAGE };
 
   const conv = await prisma.conversation.findUnique({
     where: { id: conversationId },

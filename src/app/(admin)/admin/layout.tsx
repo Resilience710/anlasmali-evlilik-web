@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck, ArrowLeft, LogOut } from "lucide-react";
-import { requireAdmin } from "@/lib/auth-guards";
+import { requireStaff } from "@/lib/auth-guards";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { signOutAction } from "@/app/_actions/auth";
 
@@ -9,7 +9,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireAdmin();
+  const staff = await requireStaff();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -44,7 +44,7 @@ export default async function AdminLayout({
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6">
         <div className="grid gap-5 lg:grid-cols-[230px_1fr]">
           <aside className="lg:sticky lg:top-20 lg:self-start">
-            <AdminSidebar />
+            <AdminSidebar role={staff.role} />
           </aside>
           <div className="min-w-0">{children}</div>
         </div>

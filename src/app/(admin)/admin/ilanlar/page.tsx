@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
-import { Badge } from "@/components/ui/badge";
-import { CategoryBadge } from "@/components/listings/category-badge";
-import { AdminListingActions } from "@/components/admin/listing-actions";
+import {
+  AdminListingsBulk,
+  type AdminListingRow,
+} from "@/components/admin/listings-bulk";
 import {
   LISTING_STATUSES,
   LISTING_STATUS_LABELS,
@@ -14,15 +15,7 @@ import { cn, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "İlanlar — Yönetim" };
 
-const statusVariant: Record<ListingStatus, "success" | "warning" | "destructive" | "neutral"> = {
-  APPROVED: "success",
-  PENDING: "warning",
-  REJECTED: "destructive",
-  ARCHIVED: "neutral",
-};
-
-// Onay sistemi kapalı (LISTING_REQUIRES_APPROVAL = false) olduğundan
-// "Onay Bekliyor" ve "Reddedildi" filtreleri gösterilmiyor.
+// Onay sistemi kapalı olduğundan Onay Bekliyor/Reddedildi filtreleri gösterilmiyor.
 const VISIBLE_STATUSES: ListingStatus[] = ["APPROVED", "ARCHIVED"];
 
 export default async function AdminListingsPage({
@@ -48,6 +41,17 @@ export default async function AdminListingsPage({
       author: { select: { profile: { select: { displayName: true } } } },
     },
   });
+
+  const rows: AdminListingRow[] = listings.map((l) => ({
+    id: l.id,
+    title: l.title,
+    status: l.status,
+    categoryName: l.category.name,
+    authorName: l.author.profile?.displayName ?? "—",
+    cityName: l.city.name,
+    age: l.age,
+    when: timeAgo(l.createdAt),
+  }));
 
   return (
     <div className="flex flex-col gap-5">
@@ -77,40 +81,7 @@ export default async function AdminListingsPage({
         ))}
       </div>
 
-      {listings.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-border bg-surface p-10 text-center text-muted-foreground">
-          İlan bulunamadı.
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {listings.map((l) => (
-            <div
-              key={l.id}
-              className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-4 lg:flex-row lg:items-center lg:justify-between"
-            >
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={statusVariant[l.status as ListingStatus]}>
-                    {LISTING_STATUS_LABELS[l.status as ListingStatus]}
-                  </Badge>
-                  <CategoryBadge name={l.category.name} slug={l.category.slug} />
-                </div>
-                <Link
-                  href={`/admin/ilanlar/${l.id}`}
-                  className="mt-1.5 block font-medium hover:text-primary"
-                >
-                  {l.title}
-                </Link>
-                <p className="text-xs text-muted-foreground">
-                  {l.author.profile?.displayName ?? "—"} · {l.city.name} ·{" "}
-                  {l.age} yaş · {timeAgo(l.createdAt)}
-                </p>
-              </div>
-              <AdminListingActions id={l.id} status={l.status} />
-            </div>
-          ))}
-        </div>
-      )}
+      <AdminListingsBulk rows={rows} />
     </div>
   );
 }

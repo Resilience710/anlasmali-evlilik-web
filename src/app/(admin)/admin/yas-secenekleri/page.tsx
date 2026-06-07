@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CatalogDeleteButton } from "@/components/admin/simple-action-buttons";
+import { requireAdmin } from "@/lib/auth-guards";
 
 export const metadata: Metadata = { title: "Yaş Seçenekleri — Yönetim" };
 
 export default async function AdminAgeOptionsPage() {
+  await requireAdmin();
   const options = await prisma.ageOption.findMany({ orderBy: { order: "asc" } });
 
   return (
