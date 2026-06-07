@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import { Mail, Phone } from "lucide-react";
 import { getSiteSettings } from "@/lib/site";
 import { ContactForm } from "@/components/contact-form";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "İletişim" };
+export const metadata: Metadata = pageMetadata({
+  title: "İletişim - AnlaşmalıEvlilik.com",
+  description:
+    "AnlaşmalıEvlilik.com üyelik, ilan, şikayet, güvenlik ve iş birliği talepleri için iletişim sayfası.",
+  path: "/iletisim",
+  keywords: ["evlilik sitesi iletişim", "üyelik destek", "ilan şikayet"],
+});
 
 const DEFAULT_TEXT =
   "Şikâyet, reklam/iş birliği ve diğer talepleriniz için bize ulaşabilirsiniz. Mesajınızı sağdaki formdan iletin, en kısa sürede dönüş yapalım.";

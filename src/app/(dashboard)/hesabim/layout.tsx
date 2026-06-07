@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { requireUser } from "@/lib/auth-guards";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Hesabım",
+  description: "Üye hesap paneli.",
+  path: "/hesabim",
+  noIndex: true,
+});
 
 export default async function DashboardLayout({
   children,

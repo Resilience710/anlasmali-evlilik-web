@@ -17,6 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { LISTING_STATUS_LABELS, GENDER_LABELS } from "@/lib/constants";
 import { getMissingProfileFields } from "@/lib/profile-completeness";
 import { initials, timeAgo } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/json-ld";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -26,9 +28,26 @@ export async function generateMetadata({
   const { slug } = await params;
   const listing = await getListingBySlug(slug);
   // Yayında olmayan ilanların başlığı metadata'da sızmasın
-  return {
-    title: listing && listing.status === "APPROVED" ? listing.title : "İlan",
-  };
+  if (!listing || listing.status !== "APPROVED") {
+    return pageMetadata({
+      title: "İlan",
+      description: "Evlilik ilanı yayında değil.",
+      path: "/ilanlar",
+      noIndex: true,
+    });
+  }
+
+  const authorName = listing.author.profile?.displayName ?? "Üye";
+  return pageMetadata({
+    title: `${listing.title} - ${listing.city.name} Evlilik İlanı`,
+    description: `${listing.city.name} ${listing.category.name.toLowerCase()} kategorisinde ${listing.age} yaşında ${GENDER_LABELS[listing.gender as keyof typeof GENDER_LABELS].toLowerCase()} üyenin ciddi evlilik ilanı: ${listing.description}`,
+    path: `/ilanlar/${listing.slug}`,
+    keywords: [
+      `${listing.city.name} evlilik ilanları`,
+      `${listing.category.name} evlilik ilanları`,
+      `${authorName} evlilik ilanı`,
+    ],
+  });
 }
 
 export default async function ListingDetailPage({
@@ -83,6 +102,66 @@ export default async function ListingDetailPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+      {listing.status === "APPROVED" && (
+        <>
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "Article",
+              headline: listing.title,
+              description: listing.description,
+              url: absoluteUrl(`/ilanlar/${listing.slug}`),
+              inLanguage: "tr-TR",
+              datePublished: when.toISOString(),
+              dateModified: listing.updatedAt.toISOString(),
+              author: {
+                "@type": "Person",
+                name: authorName,
+                url: absoluteUrl(`/uyeler/${listing.author.id}`),
+              },
+              about: [
+                "anlaşmalı evlilik",
+                "ciddi evlilik",
+                listing.category.name,
+                listing.city.name,
+              ],
+              ...(listing.imageUrl
+                ? {
+                    image: listing.imageUrl.startsWith("http")
+                      ? listing.imageUrl
+                      : absoluteUrl(listing.imageUrl),
+                  }
+                : {}),
+            }}
+          />
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Ana Sayfa",
+                  item: absoluteUrl("/"),
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "İlanlar",
+                  item: absoluteUrl("/ilanlar"),
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: listing.title,
+                  item: absoluteUrl(`/ilanlar/${listing.slug}`),
+                },
+              ],
+            }}
+          />
+        </>
+      )}
       <Link
         href="/ilanlar"
         className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

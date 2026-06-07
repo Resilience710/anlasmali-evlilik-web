@@ -11,6 +11,8 @@ import { ListingCard } from "@/components/listings/listing-card";
 import { ReportDialog } from "@/components/listings/report-dialog";
 import { GENDER_LABELS, type Gender } from "@/lib/constants";
 import { initials, timeAgo } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/json-ld";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -19,7 +21,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const data = await getMemberProfile(id);
-  return { title: data?.user.profile?.displayName ?? "Üye Profili" };
+  if (!data?.user.profile) {
+    return pageMetadata({
+      title: "Üye Profili",
+      description: "Üye profili bulunamadı.",
+      path: "/uyeler",
+      noIndex: true,
+    });
+  }
+
+  const p = data.user.profile;
+  const details = [
+    p.city?.name,
+    p.age && `${p.age} yaş`,
+    p.gender && GENDER_LABELS[p.gender as Gender],
+    p.lookingFor && `${GENDER_LABELS[p.lookingFor as Gender]} arıyor`,
+  ].filter(Boolean);
+
+  return pageMetadata({
+    title: `${p.displayName} - Ciddi Evlilik Profili`,
+    description: `${p.displayName} kullanıcısının ciddi evlilik profili. ${details.join(", ")}. ${p.bio ?? "Evlilik ve ciddi ilişki amacıyla üye olmuş profil."}`,
+    path: `/uyeler/${id}`,
+    keywords: [
+      `${p.displayName} evlilik profili`,
+      p.city?.name ? `${p.city.name} evlilik üyeleri` : "evlilik üyeleri",
+      "eş adayı profili",
+    ],
+  });
 }
 
 export default async function MemberProfilePage({
@@ -39,6 +67,47 @@ export default async function MemberProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name,
+          url: absoluteUrl(`/uyeler/${id}`),
+          description:
+            p?.bio ?? "Ciddi evlilik ve ilişki amacıyla oluşturulmuş üye profili.",
+          gender: p?.gender ? GENDER_LABELS[p.gender as Gender] : undefined,
+          homeLocation: p?.city?.name
+            ? { "@type": "Place", name: p.city.name }
+            : undefined,
+          knowsAbout: ["ciddi evlilik", "hayat arkadaşı", "evlilik ilanları"],
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Ana Sayfa",
+              item: absoluteUrl("/"),
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "Üyeler",
+              item: absoluteUrl("/uyeler"),
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name,
+              item: absoluteUrl(`/uyeler/${id}`),
+            },
+          ],
+        }}
+      />
       <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4 sm:p-6">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
           <Avatar className="h-24 w-24">

@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LifeBuoy, MessageSquare, FileText } from "lucide-react";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Yardım" };
+export const metadata: Metadata = pageMetadata({
+  title: "Yardım - İlan, Üyelik ve Mesajlaşma",
+  description:
+    "Evlilik ilanı oluşturma, üyelik, profil tamamlama ve güvenli mesajlaşma adımları için yardım merkezi.",
+  path: "/yardim",
+  keywords: ["evlilik sitesi yardım", "evlilik ilanı oluşturma", "üyelik yardımı"],
+});
 
 const CARDS = [
   {

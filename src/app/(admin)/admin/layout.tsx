@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, ArrowLeft, LogOut } from "lucide-react";
 import { requireStaff } from "@/lib/auth-guards";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { signOutAction } from "@/app/_actions/auth";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Yönetim Paneli",
+  description: "Yönetim paneli.",
+  path: "/admin",
+  noIndex: true,
+});
 
 export default async function AdminLayout({
   children,

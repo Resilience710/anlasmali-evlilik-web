@@ -5,8 +5,14 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { signOutAction } from "@/app/_actions/auth";
 import { Button } from "@/components/ui/button";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Hesap Askıya Alındı" };
+export const metadata: Metadata = pageMetadata({
+  title: "Hesap Askıya Alındı",
+  description: "Hesap askıya alma bilgilendirme sayfası.",
+  path: "/hesap-askida",
+  noIndex: true,
+});
 
 export default async function AccountSuspendedPage() {
   const session = await auth();

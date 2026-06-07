@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Kullanım Şartları" };
+export const metadata: Metadata = pageMetadata({
+  title: "Kullanım Şartları",
+  description:
+    "AnlaşmalıEvlilik.com üyelik, ilan, profil, mesajlaşma ve güvenli kullanım koşulları.",
+  path: "/kullanim-sartlari",
+  keywords: ["evlilik sitesi kullanım şartları", "üyelik koşulları", "ilan kuralları"],
+});
 
 export default async function TermsPage() {
   const s = await getSiteSettings();

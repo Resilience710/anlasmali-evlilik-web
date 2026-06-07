@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/site";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Sorumluluk Reddi ve Kullanım Koşulları",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Sorumluluk Reddi ve Güvenli Kullanım",
+  description:
+    "AnlaşmalıEvlilik.com ilan, profil, mesajlaşma, kullanıcı içeriği ve güvenli tanışma sorumluluk reddi.",
+  path: "/sorumluluk-reddi",
+  keywords: ["evlilik sitesi sorumluluk reddi", "güvenli tanışma", "ilan sorumluluğu"],
+});
 
 export default async function DisclaimerPage() {
   const s = await getSiteSettings();

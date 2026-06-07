@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import { Logo } from "@/components/layout/logo";
 import { getSiteSettings } from "@/lib/site";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Üyelik İşlemleri",
+  description: "AnlaşmalıEvlilik.com üyelik ve giriş işlemleri.",
+  path: "/giris",
+  noIndex: true,
+});
 
 export default async function AuthLayout({
   children,
