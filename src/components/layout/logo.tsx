@@ -24,16 +24,26 @@ export function Logo({
     post = siteName.slice(idx + 7);
   }
 
+  // Logo görseli yüklendiyse yalnızca görseli göster (görsel zaten marka adını
+  // içeriyor); yoksa ikon + metin lockup'ı kullan.
+  if (logoUrl) {
+    return (
+      <Link href="/" className="flex min-w-0 items-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoUrl}
+          alt={siteName}
+          className="h-9 w-auto shrink-0 sm:h-10"
+        />
+      </Link>
+    );
+  }
+
   return (
     <Link href="/" className="flex min-w-0 items-center gap-2.5">
-      {logoUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoUrl} alt={siteName} className="h-9 w-auto shrink-0" />
-      ) : (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
-          <HeartHandshake className="size-6" />
-        </span>
-      )}
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+        <HeartHandshake className="size-6" />
+      </span>
       <span className="flex min-w-0 flex-col leading-none">
         <span className="truncate text-[1.05rem] font-bold tracking-tight">
           {mid ? (

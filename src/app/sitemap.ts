@@ -27,10 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.75,
     },
     {
-      url: absoluteUrl("/hakkimizda"),
+      url: absoluteUrl("/yasal-prosedur"),
       lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.65,
+      changeFrequency: "yearly",
+      priority: 0.4,
     },
     {
       url: absoluteUrl("/sss"),

@@ -24,6 +24,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // Hakkımızda kaldırıldı -> Yasal Prosedür (SEO için kalıcı yönlendirme)
+      { source: "/hakkimizda", destination: "/yasal-prosedur", permanent: true },
+    ];
+  },
   // Cloudinary kullanılırsa next/image için:
   images: {
     remotePatterns: [

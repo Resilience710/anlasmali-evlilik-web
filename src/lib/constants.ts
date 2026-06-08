@@ -132,7 +132,7 @@ export const SITE_NAV = [
   { href: "/ilanlar", label: "İlanlar" },
   { href: "/hesabim/ilan-olustur", label: "İlan Oluştur" },
   { href: "/hesabim/mesajlar", label: "Mesajlar" },
-  { href: "/hakkimizda", label: "Hakkımızda" },
+  { href: "/yasal-prosedur", label: "Yasal Prosedür" },
   { href: "/iletisim", label: "İletişim" },
 ] as const;
 
