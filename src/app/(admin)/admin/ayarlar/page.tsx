@@ -17,6 +17,7 @@ export default async function AdminSettingsPage() {
           siteName: s.siteName,
           tagline: s.tagline,
           logoUrl: s.logoUrl,
+          heroImageUrl: s.heroImageUrl,
           heroTitle: s.heroTitle,
           heroSubtitle: s.heroSubtitle,
           aboutText: s.aboutText,

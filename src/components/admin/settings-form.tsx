@@ -12,6 +12,7 @@ type Defaults = {
   siteName: string;
   tagline?: string | null;
   logoUrl?: string | null;
+  heroImageUrl?: string | null;
   heroTitle: string;
   heroSubtitle?: string | null;
   aboutText?: string | null;
@@ -66,7 +67,15 @@ export function SettingsForm({ defaults }: { defaults: Defaults }) {
 
       <Section title="Ana Sayfa">
         <div>
-          <Label htmlFor="heroTitle">Hero Başlığı</Label>
+          <Label>Hero Görseli</Label>
+          <p className="mb-1.5 mt-0.5 text-xs text-muted-foreground">
+            Önerilen: 1600×600 px (yatay banner), WebP/JPG, ≤300KB. Yüklenirse
+            ana sayfada başlık/buton yerine bu görsel gösterilir.
+          </p>
+          <ImageUpload name="heroImageUrl" defaultUrl={defaults.heroImageUrl} label="Hero görseli" rounded="lg" />
+        </div>
+        <div>
+          <Label htmlFor="heroTitle">Hero Başlığı (görsel yoksa)</Label>
           <Input id="heroTitle" name="heroTitle" defaultValue={defaults.heroTitle} className="mt-1.5" required />
         </div>
         <div>

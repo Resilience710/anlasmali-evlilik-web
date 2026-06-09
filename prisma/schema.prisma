@@ -239,6 +239,7 @@ model SiteSetting {
   logoUrl      String?
   heroTitle    String   @default("Hayat Arkadaşınızı Burada Bulun")
   heroSubtitle String   @default("Ciddi düşünen, geleceğe birlikte yürümek isteyen insanları bir araya getiriyoruz.")
+  heroImageUrl String? // Ana sayfa hero görseli (admin yükler)
   aboutText    String?
   contactEmail String?
   contactPhone String?

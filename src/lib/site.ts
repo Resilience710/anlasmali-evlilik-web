@@ -25,6 +25,7 @@ export const getSiteSettings = cache(async () => {
       id: "singleton",
       ...DEFAULTS,
       logoUrl: null as string | null,
+      heroImageUrl: null as string | null,
       aboutText: null as string | null,
       contactEmail: null as string | null,
       contactPhone: null as string | null,

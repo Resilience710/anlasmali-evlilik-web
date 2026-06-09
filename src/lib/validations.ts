@@ -172,6 +172,7 @@ export const siteSettingSchema = z.object({
   siteName: z.string().min(1).max(80),
   tagline: z.string().max(120).optional(),
   logoUrl: z.string().optional(),
+  heroImageUrl: z.string().optional(),
   heroTitle: z.string().min(1).max(160),
   heroSubtitle: z.string().max(400).optional(),
   aboutText: z.string().max(5000).optional(),

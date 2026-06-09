@@ -5,10 +5,29 @@ import { Button } from "@/components/ui/button";
 export function Hero({
   title,
   subtitle,
+  imageUrl,
 }: {
   title: string;
   subtitle: string;
+  imageUrl?: string | null;
 }) {
+  // Görsel yüklendiyse hero yalnızca görseldir (başlık/buton yok).
+  if (imageUrl) {
+    return (
+      <Link
+        href="/ilanlar"
+        className="block overflow-hidden rounded-[var(--radius-card)] border border-border"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={title}
+          className="h-auto w-full"
+        />
+      </Link>
+    );
+  }
+
   const words = title.split(" ");
 
   return (

@@ -4,20 +4,13 @@ import { redirectIfBanned } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/site";
 import { getSiteStats } from "@/lib/stats";
-import {
-  getRecentListings,
-  getCategorySidebar,
-  getCitySidebar,
-  getCatalog,
-} from "@/lib/listings";
+import { getRecentListings, getCatalog } from "@/lib/listings";
 import { getUnreadMessageTotal } from "@/lib/conversations";
 import { getUnreadNotificationCount } from "@/lib/notifications";
 import { Hero } from "@/components/home/hero";
 import { OnlineCard } from "@/components/home/online-card";
 import { FeatureCards } from "@/components/home/feature-cards";
-import { StatsStrip } from "@/components/home/stats-strip";
 import { RecentListings } from "@/components/home/recent-listings";
-import { CategorySidebar } from "@/components/home/category-sidebar";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { InlineListingWizard } from "@/components/home/inline-listing-wizard";
 import { AccountPanel } from "@/components/home/account-panel";
@@ -42,15 +35,12 @@ export default async function HomePage() {
   const session = await auth();
   const userId = session?.user?.id;
 
-  const [settings, stats, recent, catSidebar, citySidebar, catalog] =
-    await Promise.all([
-      getSiteSettings(),
-      getSiteStats(),
-      getRecentListings(5),
-      getCategorySidebar(),
-      getCitySidebar(5),
-      getCatalog(),
-    ]);
+  const [settings, stats, recent, catalog] = await Promise.all([
+    getSiteSettings(),
+    getSiteStats(),
+    getRecentListings(5),
+    getCatalog(),
+  ]);
 
   let accountUser: { id: string; name: string; avatarUrl?: string | null } | null =
     null;
@@ -104,36 +94,25 @@ export default async function HomePage() {
           }}
         />
       )}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[3fr_1fr_1fr]">
-        {/* Sol ana sütun */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[2.4fr_1fr]">
+        {/* Sol ana sütun: hero görseli + son ilanlar */}
         <div className="flex min-w-0 flex-col gap-5">
           <Hero
             title={settings.heroTitle}
             subtitle={settings.heroSubtitle ?? settings.tagline}
-          />
-          <FeatureCards />
-          <StatsStrip
-            totalUsers={stats.totalUsers}
-            online={stats.online}
-            totalListings={stats.totalListings}
-            happyCount={stats.happyCount}
+            imageUrl={settings.heroImageUrl}
           />
           <RecentListings listings={recent} />
         </div>
 
-        {/* Orta sütun */}
+        {/* Sağ tek sütun: Hesabım -> Online -> İlan Oluştur -> Nasıl Çalışır */}
         <div className="flex min-w-0 flex-col gap-5">
-          <OnlineCard online={stats.online} />
-          <CategorySidebar
-            total={catSidebar.total}
-            categories={catSidebar.categories}
-            cities={citySidebar}
+          <AccountPanel
+            user={accountUser}
+            unreadMessages={unreadMessages}
+            unreadNotifications={unreadNotifications}
           />
-          <HowItWorks />
-        </div>
-
-        {/* Sağ sütun */}
-        <div className="flex min-w-0 flex-col gap-5">
+          <OnlineCard online={stats.online} />
           <InlineListingWizard
             categories={catalog.categories.map((c) => ({
               id: c.id,
@@ -142,11 +121,7 @@ export default async function HomePage() {
             cities={catalog.cities.map((c) => ({ id: c.id, name: c.name }))}
             isLoggedIn={!!userId}
           />
-          <AccountPanel
-            user={accountUser}
-            unreadMessages={unreadMessages}
-            unreadNotifications={unreadNotifications}
-          />
+          <HowItWorks />
         </div>
       </div>
 
@@ -188,6 +163,11 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Güvenli ortam / ciddi niyet kartları — sayfanın en altında */}
+      <div className="mt-10">
+        <FeatureCards />
+      </div>
     </div>
   );
 }
