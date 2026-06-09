@@ -38,7 +38,7 @@ export default async function HomePage() {
   const [settings, stats, recent, catalog] = await Promise.all([
     getSiteSettings(),
     getSiteStats(),
-    getRecentListings(5),
+    getRecentListings(10),
     getCatalog(),
   ]);
 
@@ -125,47 +125,8 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <section className="mt-10 border-t border-border pt-8">
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <div>
-            <h2 className="text-xl font-bold sm:text-2xl">
-              Ciddi evlilik ve anlaşmalı evlilik ilanları
-            </h2>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              AnlaşmalıEvlilik.net, evlilik niyetiyle tanışmak isteyen yetişkin
-              üyeleri şehir, yaş, cinsiyet ve ilan kategorilerine göre bir araya
-              getirir. Amaç; geçici sohbetlerden çok, beklentisini açıkça yazan
-              kişilerle güvenli ve saygılı bir tanışma alanı oluşturmaktır.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
-              <h3 className="font-semibold">Türkiye geneli arama</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                İstanbul, Ankara, İzmir, Bursa, Antalya ve tüm şehirlerde aktif
-                evlilik ilanlarını filtreleyin.
-              </p>
-            </div>
-            <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
-              <h3 className="font-semibold">Ciddi niyet odaklı</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                İlanlar; hayat arkadaşı, yuva kurma ve uzun vadeli ilişki
-                beklentisini açıkça ifade eden üyeler içindir.
-              </p>
-            </div>
-            <div className="rounded-[var(--radius-card)] border border-border bg-surface p-4">
-              <h3 className="font-semibold">Gizlilik ve moderasyon</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Şikayet, engelleme, profil tamamlama ve yönetici kontrolleriyle
-                daha kontrollü bir tanışma deneyimi sunulur.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Güvenli ortam / ciddi niyet kartları — sayfanın en altında */}
-      <div className="mt-10">
+      <div className="mt-10 border-t border-border pt-8">
         <FeatureCards />
       </div>
     </div>
