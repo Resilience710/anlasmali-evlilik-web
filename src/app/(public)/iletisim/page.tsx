@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Mail, Phone } from "lucide-react";
+import { Mail } from "lucide-react";
 import { getSiteSettings } from "@/lib/site";
 import { ContactForm } from "@/components/contact-form";
 import { pageMetadata } from "@/lib/seo";
@@ -42,14 +42,6 @@ export default async function ContactPage() {
                 {s.contactEmail}
               </a>
             )}
-            {s.contactPhone && (
-              <span className="inline-flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-soft text-primary">
-                  <Phone className="size-4" />
-                </span>
-                {s.contactPhone}
-              </span>
-            )}
           </div>
         </div>
 
@@ -59,6 +51,41 @@ export default async function ContactPage() {
           <ContactForm />
         </div>
       </div>
+
+      {/* Neden Bu Platformu Kurduk? */}
+      <section className="mt-10 rounded-[var(--radius-card)] border border-border bg-surface p-5 sm:p-8">
+        <h2 className="text-xl font-bold sm:text-2xl">
+          Neden Bu Platformu Kurduk?
+        </h2>
+        <div className="mt-4 space-y-4 leading-relaxed text-foreground/90">
+          <p>
+            Her insanın evlilikten beklentisi farklıdır. Kimi hayatını
+            paylaşacağı bir eş ararken, kimi ortak hedeflere ve benzer yaşam
+            planlarına sahip bir kişiyle tanışmak ister.
+          </p>
+          <p>
+            Platformumuz; ciddi evlilik düşünen, hayatını düzenlemek isteyen,
+            çocuk sahibi olmayı hedefleyen veya yaşam koşulları nedeniyle
+            evlilik planı yapan kişilerin güvenli ve saygılı bir ortamda
+            tanışabilmesi amacıyla kurulmuştur.
+          </p>
+          <p>
+            Burada amaç; dürüstlük, karşılıklı anlayış ve şeffaf iletişim
+            temelinde insanları bir araya getirmektir. Üyelerimiz beklentilerini
+            açıkça belirterek benzer hedeflere sahip kişilerle iletişim kurabilir
+            ve geleceğe yönelik ortak kararlar alabilir.
+          </p>
+          <p>
+            Platformumuz tamamen ücretsizdir. Üyelerimiz herhangi bir üyelik
+            ücreti veya gizli maliyet olmadan kayıt olabilir, profil oluşturabilir
+            ve diğer üyelerle iletişim kurabilir.
+          </p>
+          <p>
+            Mutlu ve sağlam temeller üzerine kurulan birlikteliklerin başlangıç
+            noktası olmayı hedefliyoruz.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
