@@ -3,9 +3,10 @@
  * Origin yoksa (bazı meşru istekler) izin verir; eşleşmiyorsa reddeder.
  */
 export function isSameOrigin(req: Request): boolean {
-  const origin = req.headers.get("origin");
+  // Bazı proxy'ler başlıkları çiftleyip ", " ile birleştirebilir — ilk değeri al.
+  const origin = req.headers.get("origin")?.split(",")[0].trim();
   if (!origin) return true;
-  const host = req.headers.get("host");
+  const host = req.headers.get("host")?.split(",")[0].trim();
   try {
     return new URL(origin).host === host;
   } catch {
