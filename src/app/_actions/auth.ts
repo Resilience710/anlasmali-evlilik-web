@@ -120,7 +120,9 @@ export async function registerAction(
 
   // E-posta doğrulama AÇIK ise: doğrulama maili gönder, otomatik giriş YAPMA
   if (verifyEnabled) {
-    await sendVerifyTo(email).catch(() => {});
+    await sendVerifyTo(email).catch((e) =>
+      console.error("[register] doğrulama e-postası gönderilemedi:", e)
+    );
     return {
       success:
         "Hesabınız oluşturuldu! E-postanıza gönderdiğimiz doğrulama bağlantısına tıkladıktan sonra giriş yapabilirsiniz.",
@@ -160,7 +162,9 @@ export async function resendVerificationAction(
     select: { emailVerified: true, deletedAt: true },
   });
   if (user && !user.deletedAt && !user.emailVerified) {
-    await sendVerifyTo(email).catch(() => {});
+    await sendVerifyTo(email).catch((e) =>
+      console.error("[resend] doğrulama e-postası gönderilemedi:", e)
+    );
   }
   // Bilgi sızdırmamak için her durumda aynı mesaj
   return { success: "Doğrulama bağlantısı e-posta adresinize tekrar gönderildi." };
@@ -248,7 +252,9 @@ export async function forgotPasswordAction(
     await sendPasswordResetEmail(
       email,
       await absoluteUrl(`/sifre-sifirla/${token}`)
-    ).catch(() => {});
+    ).catch((e) =>
+      console.error("[forgot] sıfırlama e-postası gönderilemedi:", e)
+    );
   }
   return generic;
 }
