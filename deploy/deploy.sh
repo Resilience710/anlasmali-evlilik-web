@@ -11,9 +11,9 @@ git pull --ff-only
 echo "==> Bağımlılıklar (npm ci) — postinstall prisma generate çalışır..."
 npm ci
 
-# Şema değişikliği yaptıysan aç (VERİYİ SİLMEZ):
-# echo "==> prisma db push..."
-# npx prisma db push
+# Şema senkronu (VERİYİ SİLMEZ; --force-reset YOK). Yeni tablo/kolon varsa ekler.
+echo "==> prisma db push (şema senkronu, veri silinmez)..."
+npx prisma db push
 
 echo "==> Production build..."
 npm run build
