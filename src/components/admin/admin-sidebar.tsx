@@ -15,6 +15,7 @@ import {
   Settings,
   ScrollText,
   Ban,
+  Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ const ITEMS = [
   { href: "/admin/mesajlar", label: "Mesaj Şikayetleri", icon: MessageSquare },
   { href: "/admin/sikayetler", label: "Şikayetler", icon: Flag },
   { href: "/admin/istatistikler", label: "İstatistikler", icon: BarChart3 },
+  { href: "/admin/blog", label: "Blog", icon: Newspaper, adminOnly: true },
   { href: "/admin/kategoriler", label: "Kategoriler", icon: Tags, adminOnly: true },
   { href: "/admin/sehirler", label: "Şehirler", icon: MapPin, adminOnly: true },
   { href: "/admin/yas-secenekleri", label: "Yaş Seçenekleri", icon: CalendarRange, adminOnly: true },

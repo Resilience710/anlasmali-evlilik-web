@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { slugify } from "@/lib/utils";
@@ -9,6 +10,7 @@ import {
   citySchema,
   ageOptionSchema,
   siteSettingSchema,
+  blogPostSchema,
 } from "@/lib/validations";
 import { logAudit } from "@/lib/audit";
 
@@ -506,4 +508,94 @@ export async function deleteBannedWordAction(id: string) {
     targetId: id,
   });
   revalidatePath("/admin/yasakli-kelimeler");
+}
+
+// ---------- Blog yazıları ----------
+/** Slug'ı benzersizleştir (mevcut id hariç). */
+async function uniqueBlogSlug(base: string, exceptId?: string): Promise<string> {
+  let slug = base || "yazi";
+  let i = 2;
+  // Çakışma varken sonuna -2, -3 ekle
+  // (admin işlemi; küçük döngü yeterli)
+  while (true) {
+    const existing = await prisma.blogPost.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (!existing || existing.id === exceptId) return slug;
+    slug = `${base}-${i++}`;
+  }
+}
+
+export async function upsertBlogPostAction(formData: FormData): Promise<void> {
+  const me = await ensureAdmin();
+  const id = String(formData.get("id") ?? "");
+  const parsed = blogPostSchema.safeParse({
+    title: formData.get("title"),
+    slug: formData.get("slug") ?? "",
+    metaTitle: formData.get("metaTitle") ?? "",
+    metaDescription: formData.get("metaDescription") ?? "",
+    excerpt: formData.get("excerpt") ?? "",
+    keyword: formData.get("keyword") ?? "",
+    content: formData.get("content"),
+    coverImageUrl: formData.get("coverImageUrl") ?? "",
+    order: formData.get("order") ?? 0,
+    published: formData.get("published") === "on",
+  });
+  if (!parsed.success) {
+    // Hatalı girişte sessizce dön (admin formu); slug/içerik kuralları korunur.
+    return;
+  }
+  const d = parsed.data;
+  const baseSlug = slugify(d.slug || d.title);
+  const slug = await uniqueBlogSlug(baseSlug, id || undefined);
+
+  const data = {
+    slug,
+    title: d.title,
+    metaTitle: d.metaTitle || null,
+    metaDescription: d.metaDescription || null,
+    excerpt: d.excerpt || null,
+    keyword: d.keyword || null,
+    content: d.content,
+    coverImageUrl: d.coverImageUrl || null,
+    order: d.order,
+    published: d.published,
+  };
+
+  if (id) {
+    await prisma.blogPost.update({ where: { id }, data });
+    await logAudit(me, "Blog yazısı güncellendi", {
+      targetType: "BlogPost",
+      targetId: id,
+      detail: d.title,
+    });
+  } else {
+    const created = await prisma.blogPost.create({ data });
+    await logAudit(me, "Blog yazısı eklendi", {
+      targetType: "BlogPost",
+      targetId: created.id,
+      detail: d.title,
+    });
+  }
+
+  revalidatePath("/admin/blog");
+  revalidatePath("/blog");
+  revalidatePath(`/blog/${slug}`);
+  redirect("/admin/blog");
+}
+
+export async function deleteBlogPostAction(id: string) {
+  const me = await ensureAdmin();
+  const post = await prisma.blogPost
+    .delete({ where: { id }, select: { slug: true, title: true } })
+    .catch(() => null);
+  await logAudit(me, "Blog yazısı silindi", {
+    targetType: "BlogPost",
+    targetId: id,
+    detail: post?.title,
+  });
+  revalidatePath("/admin/blog");
+  revalidatePath("/blog");
+  if (post?.slug) revalidatePath(`/blog/${post.slug}`);
 }

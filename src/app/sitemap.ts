@@ -39,6 +39,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4,
     },
     {
+      url: absoluteUrl("/blog"),
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
       url: absoluteUrl("/sss"),
       lastModified: now,
       changeFrequency: "monthly",
@@ -82,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const [listings, members] = await Promise.all([
+  const [listings, members, blogPosts] = await Promise.all([
     prisma.listing.findMany({
       where: { status: "APPROVED", deletedAt: null },
       orderBy: { publishedAt: "desc" },
@@ -105,6 +111,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { id: true, updatedAt: true },
       take: 5000,
     }),
+    prisma.blogPost.findMany({
+      where: { published: true },
+      orderBy: { publishedAt: "desc" },
+      select: { slug: true, updatedAt: true, publishedAt: true },
+      take: 5000,
+    }),
   ]);
 
   const listingRoutes: MetadataRoute.Sitemap = listings.map((listing) => {
@@ -125,6 +137,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.55,
   }));
 
-  return [...staticRoutes, ...listingRoutes, ...memberRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: absoluteUrl(`/blog/${post.slug}`),
+    lastModified: post.updatedAt ?? post.publishedAt ?? now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...listingRoutes, ...memberRoutes, ...blogRoutes];
 }
 

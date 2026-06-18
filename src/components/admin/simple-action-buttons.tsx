@@ -8,6 +8,7 @@ import {
   deleteAgeOptionAction,
   adminDeleteMessageAction,
   deleteBannedWordAction,
+  deleteBlogPostAction,
 } from "@/app/_actions/admin";
 
 const ACTIONS: Record<string, (id: string) => Promise<void>> = {
@@ -16,6 +17,7 @@ const ACTIONS: Record<string, (id: string) => Promise<void>> = {
   age: deleteAgeOptionAction,
   message: adminDeleteMessageAction,
   bannedWord: deleteBannedWordAction,
+  blogPost: deleteBlogPostAction,
 };
 
 export function CatalogDeleteButton({
@@ -23,7 +25,7 @@ export function CatalogDeleteButton({
   id,
   label = "Sil",
 }: {
-  kind: "category" | "city" | "age" | "message" | "bannedWord";
+  kind: "category" | "city" | "age" | "message" | "bannedWord" | "blogPost";
   id: string;
   label?: string;
 }) {

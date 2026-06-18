@@ -224,6 +224,26 @@ model Report {
   @@index([status])
 }
 
+// ---------- Blog / İçerik (admin yönetir) ----------
+model BlogPost {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String // Görünen başlık / H1
+  metaTitle       String? // <title> etiketi (kısa)
+  metaDescription String? // meta description
+  excerpt         String? // Liste kartı özeti
+  keyword         String? // Birincil anahtar kelime (SEO)
+  content         String // Markdown gövde
+  coverImageUrl   String? // Kapak görseli (opsiyonel)
+  published       Boolean   @default(true)
+  order           Int       @default(0)
+  publishedAt     DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+}
+
 // ---------- Yasaklı kelimeler (otomatik moderasyon) ----------
 model BannedWord {
   id        String   @id @default(cuid())

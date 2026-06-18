@@ -168,6 +168,19 @@ export const ageOptionSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+export const blogPostSchema = z.object({
+  title: z.string().min(3, "Başlık en az 3 karakter olmalı.").max(200),
+  slug: z.string().max(80).optional().or(z.literal("")),
+  metaTitle: z.string().max(200).optional().or(z.literal("")),
+  metaDescription: z.string().max(400).optional().or(z.literal("")),
+  excerpt: z.string().max(400).optional().or(z.literal("")),
+  keyword: z.string().max(120).optional().or(z.literal("")),
+  content: z.string().min(20, "İçerik çok kısa.").max(50000),
+  coverImageUrl: z.string().max(500).optional().or(z.literal("")),
+  order: z.coerce.number().int().min(0).default(0),
+  published: z.boolean().default(true),
+});
+
 export const siteSettingSchema = z.object({
   siteName: z.string().min(1).max(80),
   tagline: z.string().max(120).optional(),
