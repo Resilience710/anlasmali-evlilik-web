@@ -35,6 +35,6 @@ export const config = {
   // Tüm sayfalar + API (server action'lar sayfa URL'sine POST edilir).
   // api/auth hariç (Auth.js kendi route'larını yönetir), statikler hariç.
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|icon.png|uploads/).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|icon.png|app-ads.txt|ads.txt|uploads/).*)",
   ],
 };
