@@ -35,9 +35,16 @@ for (let i = 0; i < data.length; i += 4) {
   }
 }
 
-await sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } })
+const out = await sharp(data, {
+  raw: { width: info.width, height: info.height, channels: 4 },
+})
+  .trim({ threshold: 10 }) // şeffaf kenar boşluklarını kırp (artwork çerçeveyi doldursun)
   .png()
-  .toFile(OUT);
+  .toBuffer({ resolveWithObject: true });
+
+await sharp(out.data).toFile(OUT);
 
 const pct = ((transparent / (info.width * info.height)) * 100).toFixed(1);
-console.log(`✓ ${OUT} (${info.width}x${info.height}) — %${pct} piksel şeffaf yapıldı`);
+console.log(
+  `✓ ${OUT} — kaynak ${info.width}x${info.height}, kırpıldı -> ${out.info.width}x${out.info.height} (oran ${(out.info.width / out.info.height).toFixed(2)}:1), %${pct} şeffaf`
+);

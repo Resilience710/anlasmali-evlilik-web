@@ -33,7 +33,7 @@ export function Logo({
         <img
           src={logoUrl}
           alt={siteName}
-          className="h-12 w-auto shrink-0 sm:h-14"
+          className="h-9 w-auto shrink-0 sm:h-12 lg:h-14"
         />
       </Link>
     );
