@@ -155,9 +155,9 @@ export default async function RootLayout({
           }}
         />
         <NextTopLoader
-          color="#f97316"
+          color="#ffd700"
           height={3}
-          shadow="0 0 10px #f97316,0 0 5px #f97316"
+          shadow="0 0 10px #ffd700,0 0 5px #ffd700"
           showSpinner={false}
         />
         {children}

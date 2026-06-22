@@ -53,13 +53,13 @@ export async function sendVerificationEmail(to: string, link: string) {
         anlaşmalievlilik.net'e hoş geldiniz! Hesabınızı etkinleştirmek için
         aşağıdaki butona tıklayın.
       </p>
-      <a href="${link}" style="display:inline-block;margin:18px 0;background:#f97316;color:#fff;
+      <a href="${link}" style="display:inline-block;margin:18px 0;background:#ffd700;color:#0a0a0a;
         text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:600">
         E-postamı Doğrula
       </a>
       <p style="color:#777;font-size:12px;line-height:1.6">
         Buton çalışmazsa bu bağlantıyı tarayıcınıza yapıştırın:<br/>
-        <span style="color:#f97316">${link}</span><br/><br/>
+        <span style="color:#ffd700">${link}</span><br/><br/>
         Bu işlemi siz yapmadıysanız bu e-postayı yok sayabilirsiniz.
       </p>
     </div>
@@ -76,13 +76,13 @@ export async function sendPasswordResetEmail(to: string, link: string) {
         Hesabınız için parola sıfırlama talebi aldık. Yeni parola belirlemek için
         aşağıdaki butona tıklayın. Bu bağlantı 1 saat geçerlidir.
       </p>
-      <a href="${link}" style="display:inline-block;margin:18px 0;background:#f97316;color:#fff;
+      <a href="${link}" style="display:inline-block;margin:18px 0;background:#ffd700;color:#0a0a0a;
         text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:600">
         Parolamı Sıfırla
       </a>
       <p style="color:#777;font-size:12px;line-height:1.6">
         Buton çalışmazsa bu bağlantıyı tarayıcınıza yapıştırın:<br/>
-        <span style="color:#f97316">${link}</span><br/><br/>
+        <span style="color:#ffd700">${link}</span><br/><br/>
         Bu talebi siz yapmadıysanız bu e-postayı yok sayabilirsiniz; parolanız değişmez.
       </p>
     </div>

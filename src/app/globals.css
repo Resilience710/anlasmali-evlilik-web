@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ====== Tema (koyu sıcak antrasit + turuncu vurgu) ====== */
+/* ====== Tema (koyu antrasit + altın sarısı vurgu) ====== */
 @theme {
   --color-background: #0a0a0b;
   --color-surface: #0e0e10;
@@ -12,10 +12,10 @@
   --color-muted: #141417;
   --color-muted-foreground: #a6a6ae;
 
-  --color-primary: #f97316;
-  --color-primary-foreground: #ffffff;
-  --color-primary-hover: #fb8a3c;
-  --color-primary-soft: #2a1a0e;
+  --color-primary: #ffd700;
+  --color-primary-foreground: #0a0a0b;
+  --color-primary-hover: #ffdf33;
+  --color-primary-soft: #2a2410;
 
   /* İkincil aksan: şampanya-altın (çok sınırlı kullanım) */
   --color-accent: #d8a15c;
@@ -27,7 +27,7 @@
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
 
-  --color-ring: #f97316;
+  --color-ring: #ffd700;
 
   --radius-card: 1rem;
 
@@ -112,7 +112,7 @@
   }
 
   .text-gradient-primary {
-    background: linear-gradient(95deg, var(--color-primary) 0%, #fcb072 100%);
+    background: linear-gradient(95deg, var(--color-primary) 0%, #fff0a3 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
