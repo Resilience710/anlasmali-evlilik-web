@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Blog — Anlaşmalı Evlilik ve Ciddi İlişki Rehberi",
+  title: "Blog — Anlaşmalı Evlilik Rehberi",
   description:
     "Anlaşmalı evlilik, sözleşmeli evlilik, tayin için evlilik ve güvenli partner bulma hakkında rehber yazılar.",
   path: "/blog",
@@ -31,7 +31,7 @@ export default async function BlogIndexPage() {
           "@type": "Blog",
           name: "anlaşmalievlilik.net Blog",
           description:
-            "Anlaşmalı evlilik ve ciddi ilişki üzerine rehber yazılar.",
+            "Anlaşmalı evlilik üzerine rehber yazılar.",
           url: absoluteUrl("/blog"),
           inLanguage: "tr-TR",
           blogPost: posts.map((p) => ({
@@ -50,7 +50,7 @@ export default async function BlogIndexPage() {
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">Blog</h1>
           <p className="text-sm text-muted-foreground">
-            Anlaşmalı evlilik ve ciddi ilişki üzerine rehber yazılar.
+            Anlaşmalı evlilik üzerine rehber yazılar.
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { HeartHandshake } from "lucide-react";
 
 export function Logo({
   siteName = "anlaşmalievlilik.net",
-  tagline = "Ciddi İlişki, Mutlu Evlilik",
+  tagline = "Anlaşmalı Evlilik Platformu",
   logoUrl,
   compact = false,
 }: {

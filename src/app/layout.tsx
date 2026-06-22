@@ -44,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: s.siteName,
     publisher: s.siteName,
     keywords: SEO_KEYWORDS,
-    category: "Evlilik ve ciddi ilişki platformu",
+    category: "Anlaşmalı evlilik platformu",
     alternates: {
       canonical: "/",
       languages: {
@@ -63,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: "/opengraph-image",
           width: 1200,
           height: 630,
-          alt: `${s.siteName} ciddi evlilik platformu`,
+          alt: `${s.siteName} anlaşmalı evlilik platformu`,
         },
       ],
     },

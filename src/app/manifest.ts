@@ -3,7 +3,7 @@ import { DEFAULT_SEO_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: `${SITE_NAME} — Ciddi Evlilik Sitesi`,
+    name: `${SITE_NAME} — Anlaşmalı Evlilik Platformu`,
     short_name: "AnlaşmalıEvlilik",
     description: DEFAULT_SEO_DESCRIPTION,
     start_url: "/",

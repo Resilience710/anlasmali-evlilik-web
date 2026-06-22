@@ -13,11 +13,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sp = await searchParams;
   return pageMetadata({
-    title: "Evlilik İlanları ve Ciddi Evlilik Adayları",
+    title: "Anlaşmalı Evlilik İlanları ve Eş Adayları",
     description:
-      "Türkiye geneli ciddi evlilik ilanlarını inceleyin. Anlaşmalı evlilik ve hayat arkadaşı ilanları.",
+      "Türkiye geneli anlaşmalı evlilik ilanlarını inceleyin. Anlaşmalı evlilik ve hayat arkadaşı ilanları.",
     path: "/ilanlar",
-    keywords: ["ciddi evlilik ilanları", "evlilik ilanı", "hayat arkadaşı"],
+    keywords: ["anlaşmalı evlilik ilanları", "evlilik ilanı", "hayat arkadaşı"],
     noIndex: Boolean(sp.page),
   });
 }
@@ -40,9 +40,9 @@ export default async function ListingsPage({
         data={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Evlilik ilanları",
+          name: "Anlaşmalı evlilik ilanları",
           description:
-            "Türkiye geneli ciddi evlilik ve anlaşmalı evlilik ilanları.",
+            "Türkiye geneli anlaşmalı evlilik ilanları.",
           url: absoluteUrl("/ilanlar"),
           inLanguage: "tr-TR",
           mainEntity: {

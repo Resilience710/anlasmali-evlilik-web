@@ -13,9 +13,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sp = await searchParams;
   return pageMetadata({
-    title: "Ciddi Evlilik Üyeleri ve Eş Adayları",
+    title: "Anlaşmalı Evlilik Üyeleri ve Eş Adayları",
     description:
-      "Ciddi ilişki ve evlilik düşünen üyeleri keşfedin.",
+      "Anlaşmalı evlilik düşünen üyeleri keşfedin.",
     path: "/uyeler",
     keywords: ["evlilik üyeleri", "eş adayı bul", "evlenmek isteyenler"],
     noIndex: Boolean(sp.page),
@@ -39,9 +39,9 @@ export default async function MembersPage({
         data={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Ciddi evlilik üyeleri",
+          name: "Anlaşmalı evlilik üyeleri",
           description:
-            "Ciddi ilişki ve evlilik düşünen üyelerin herkese açık profilleri.",
+            "Anlaşmalı evlilik düşünen üyelerin herkese açık profilleri.",
           url: absoluteUrl("/uyeler"),
           inLanguage: "tr-TR",
           mainEntity: {

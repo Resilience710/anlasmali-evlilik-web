@@ -43,7 +43,7 @@ export default async function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold">2. Hizmetin Tanımı</h2>
             <p className="mt-2">
-              Platform; ciddi ilişki ve evlilik amacıyla bireylerin profil
+              Platform; anlaşmalı evlilik amacıyla bireylerin profil
               oluşturmasına, ilan vermesine ve birbirleriyle mesajlaşmasına
               olanak tanıyan bir tanışma ve eşleşme hizmetidir. Platform yalnızca
               kullanıcıları bir araya getiren bir aracıdır; kullanıcılar

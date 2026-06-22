@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { DEFAULT_SEO_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
-export const alt = `${SITE_NAME} ciddi evlilik platformu`;
+export const alt = `${SITE_NAME} anlaşmalı evlilik platformu`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -55,7 +55,7 @@ export default function Image() {
               lineHeight: 1.05,
             }}
           >
-            Anlaşmalı Evlilik ve Ciddi Evlilik Sitesi
+            Anlaşmalı Evlilik Platformu
           </div>
           <div
             style={{

@@ -40,7 +40,7 @@ export async function generateMetadata({
   const authorName = listing.author.profile?.displayName ?? "Üye";
   return pageMetadata({
     title: `${listing.title} - ${listing.city.name} Evlilik İlanı`,
-    description: `${listing.city.name} ${listing.category.name.toLowerCase()} kategorisinde ${listing.age} yaşında ${GENDER_LABELS[listing.gender as keyof typeof GENDER_LABELS].toLowerCase()} üyenin ciddi evlilik ilanı: ${listing.description}`,
+    description: `${listing.city.name} ${listing.category.name.toLowerCase()} kategorisinde ${listing.age} yaşında ${GENDER_LABELS[listing.gender as keyof typeof GENDER_LABELS].toLowerCase()} üyenin anlaşmalı evlilik ilanı: ${listing.description}`,
     path: `/ilanlar/${listing.slug}`,
     keywords: [
       `${listing.city.name} evlilik ilanları`,
@@ -121,7 +121,7 @@ export default async function ListingDetailPage({
               },
               about: [
                 "anlaşmalı evlilik",
-                "ciddi evlilik",
+                "anlaşmalı evlilik ilanı",
                 listing.category.name,
                 listing.city.name,
               ],

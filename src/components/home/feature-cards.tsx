@@ -18,8 +18,8 @@ const FEATURES = [
   },
   {
     icon: BadgeCheck,
-    title: "Ciddi Üyeler",
-    desc: "Gerçek evlilik düşünen üyelerle tanışın.",
+    title: "Gerçek Üyeler",
+    desc: "Anlaşmalı evlilik düşünen üyelerle tanışın.",
   },
 ];
 

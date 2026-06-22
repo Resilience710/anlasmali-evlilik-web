@@ -73,7 +73,7 @@ export function ListingForm({
           id="title"
           name="title"
           defaultValue={title}
-          placeholder="Örn: Ciddi evlilik düşünen hayat arkadaşı arıyorum"
+          placeholder="Örn: Anlaşmalı evlilik düşünen hayat arkadaşı arıyorum"
           className="mt-1.5"
           required
         />

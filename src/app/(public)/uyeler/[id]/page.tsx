@@ -39,8 +39,8 @@ export async function generateMetadata({
   ].filter(Boolean);
 
   return pageMetadata({
-    title: `${p.displayName} - Ciddi Evlilik Profili`,
-    description: `${p.displayName} kullanıcısının ciddi evlilik profili. ${details.join(", ")}. ${p.bio ?? "Evlilik ve ciddi ilişki amacıyla üye olmuş profil."}`,
+    title: `${p.displayName} - Anlaşmalı Evlilik Profili`,
+    description: `${p.displayName} kullanıcısının anlaşmalı evlilik profili. ${details.join(", ")}. ${p.bio ?? "Anlaşmalı evlilik amacıyla üye olmuş profil."}`,
     path: `/uyeler/${id}`,
     keywords: [
       `${p.displayName} evlilik profili`,
@@ -74,12 +74,12 @@ export default async function MemberProfilePage({
           name,
           url: absoluteUrl(`/uyeler/${id}`),
           description:
-            p?.bio ?? "Ciddi evlilik ve ilişki amacıyla oluşturulmuş üye profili.",
+            p?.bio ?? "Anlaşmalı evlilik amacıyla oluşturulmuş üye profili.",
           gender: p?.gender ? GENDER_LABELS[p.gender as Gender] : undefined,
           homeLocation: p?.city?.name
             ? { "@type": "Place", name: p.city.name }
             : undefined,
-          knowsAbout: ["ciddi evlilik", "hayat arkadaşı", "evlilik ilanları"],
+          knowsAbout: ["anlaşmalı evlilik", "hayat arkadaşı", "evlilik ilanları"],
         }}
       />
       <JsonLd

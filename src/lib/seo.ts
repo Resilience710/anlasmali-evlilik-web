@@ -7,19 +7,19 @@ export const SITE_URL =
 export const SITE_NAME = "anlaşmalievlilik.net";
 
 export const DEFAULT_SEO_TITLE =
-  "Anlaşmalı Evlilik ve Ciddi Evlilik Sitesi";
+  "Anlaşmalı Evlilik Platformu";
 
 export const DEFAULT_SEO_DESCRIPTION =
-  "Ciddi ilişki ve evlilik düşünen yetişkin üyeler için güvenli, gizlilik odaklı anlaşmalı evlilik ve evlilik ilanları platformu.";
+  "Evlilik düşünen yetişkin üyeler için güvenli ve gizlilik odaklı anlaşmalı evlilik platformu; Türkiye geneli anlaşmalı evlilik ilanları.";
 
 export const SEO_KEYWORDS = [
   "anlaşmalı evlilik",
   "anlaşmalı evlilik sitesi",
-  "ciddi evlilik sitesi",
+  "anlaşmalı evlilik platformu",
   "evlilik sitesi",
   "güvenilir evlilik sitesi",
   "evlilik ilanları",
-  "ciddi ilişki",
+  "anlaşmalı evlilik ilanları",
   "hayat arkadaşı bul",
   "evlenmek isteyenler",
   "Türkiye evlilik sitesi",
@@ -72,7 +72,7 @@ export function pageMetadata({
           url: "/opengraph-image",
           width: 1200,
           height: 630,
-          alt: `${SITE_NAME} ciddi evlilik platformu`,
+          alt: `${SITE_NAME} anlaşmalı evlilik platformu`,
         },
       ],
     },

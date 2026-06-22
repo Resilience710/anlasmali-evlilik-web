@@ -9,7 +9,7 @@ export const metadata: Metadata = pageMetadata({
   keywords: [
     "hakkımızda",
     "anlaşmalı evlilik platformu",
-    "ciddi evlilik sitesi misyon",
+    "anlaşmalı evlilik platformu misyonu",
   ],
 });
 
@@ -27,7 +27,7 @@ export default function AboutPage() {
           bir kişiyle tanışmak ister.
         </p>
         <p>
-          Platformumuz; ciddi evlilik düşünen, hayatını düzenlemek isteyen,
+          Platformumuz; anlaşmalı evlilik düşünen, hayatını düzenlemek isteyen,
           çocuk sahibi olmayı hedefleyen veya yaşam koşulları nedeniyle evlilik
           planı yapan kişilerin güvenli ve saygılı bir ortamda tanışabilmesi
           amacıyla kurulmuştur.

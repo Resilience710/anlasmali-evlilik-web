@@ -18,12 +18,12 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Anlaşmalı Evlilik Sitesi ve Ciddi Evlilik İlanları",
+  title: "Anlaşmalı Evlilik Platformu ve İlanları",
   description:
-    "Anlaşmalı evlilik, ciddi ilişki ve güvenilir evlilik ilanları için Türkiye geneli yetişkin üyelerle tanışın. Ücretsiz üyelik, onaylı ilanlar ve güvenli mesajlaşma.",
+    "Anlaşmalı evlilik ve güvenilir evlilik ilanları için Türkiye geneli yetişkin üyelerle tanışın. Ücretsiz üyelik, onaylı ilanlar ve güvenli mesajlaşma.",
   path: "/",
   keywords: [
-    "ciddi evlilik ilanları",
+    "anlaşmalı evlilik ilanları",
     "evlilik düşünenler",
     "güvenilir tanışma sitesi",
     "hayat arkadaşı arıyorum",
@@ -71,9 +71,9 @@ export default async function HomePage() {
         data={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          name: "Anlaşmalı Evlilik Sitesi ve Ciddi Evlilik İlanları",
+          name: "Anlaşmalı Evlilik Platformu ve İlanları",
           description:
-            "Anlaşmalı evlilik, ciddi ilişki ve güvenilir evlilik ilanları için Türkiye geneli yetişkin üyelerle tanışma platformu.",
+            "Anlaşmalı evlilik ve güvenilir evlilik ilanları için Türkiye geneli yetişkin üyelerle tanışma platformu.",
           url: absoluteUrl("/"),
           inLanguage: "tr-TR",
           isPartOf: { "@id": absoluteUrl("/#website") },
@@ -125,7 +125,7 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Güvenli ortam / ciddi niyet kartları — sayfanın en altında */}
+      {/* Güvenli ortam / güven kartları — sayfanın en altında */}
       <div className="mt-10 border-t border-border pt-8">
         <FeatureCards />
       </div>

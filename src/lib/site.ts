@@ -12,10 +12,10 @@ export type FaqItem = { q: string; a: string };
 
 const DEFAULTS = {
   siteName: "anlaşmalievlilik.net",
-  tagline: "Ciddi İlişki, Mutlu Evlilik",
+  tagline: "Anlaşmalı Evlilik Platformu",
   heroTitle: "Hayat Arkadaşınızı AnlaşmalıEvlilik.net'te Bulun",
   heroSubtitle:
-    "Ciddi düşünen, geleceğe birlikte yürümek isteyen insanları bir araya getiriyoruz.",
+    "Anlaşmalı evlilik düşünen, geleceğe birlikte yürümek isteyen insanları bir araya getiriyoruz.",
 };
 
 export const getSiteSettings = cache(async () => {
